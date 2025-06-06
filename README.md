@@ -177,4 +177,11 @@ mineru-web/
 
 ## 📈 Star 趋势
 
-[![Star History Chart](https://api.star-history.com/svg?repos=lpdswing/mineru-web&type=Date)](https://www.star-history.com/#lpdswing/mineru-web&Date)
+<a href="https://www.star-history.com/#lpdswing/mineru-web&Timeline">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=lpdswing/mineru-web&type=Timeline&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=lpdswing/mineru-web&type=Timeline" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=lpdswing/mineru-web&type=Timeline" />
+ </picture>
+</a>
+
