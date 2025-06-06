@@ -1,16 +1,32 @@
 name: Build and Push Docker Images
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      build_backend:
+        description: 'Build backend image'
+        required: true
+        type: boolean
+        default: true
+      build_frontend:
+        description: 'Build frontend image'
+        required: true
+        type: boolean
+        default: true
+      version:
+        description: 'Version tag for the images'
+        required: true
+        type: string
+        default: 'latest'
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   BACKEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/mineru-web-backend
   FRONTEND_IMAGE: ${{ secrets.DOCKER_USERNAME }}/mineru-web-frontend
+  VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.version }}
 
 jobs: 
   build-and-push:
@@ -32,25 +48,27 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Build and push backend image
+        if: ${{ github.event_name == 'release' || inputs.build_backend }}
         uses: docker/build-push-action@v4
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
+            ${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}
             ${{ env.BACKEND_IMAGE }}:latest
-            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Build and push frontend image
+        if: ${{ github.event_name == 'release' || inputs.build_frontend }}
         uses: docker/build-push-action@v4
         with:
           context: ./frontend
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
+            ${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}
             ${{ env.FRONTEND_IMAGE }}:latest
-            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max 
