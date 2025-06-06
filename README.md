@@ -73,6 +73,8 @@ cp magic-pdf.example.json magic-pdf.json
             "http://your-minio-address:9000"
         ]
     },
+    "device-mode": "cpu", # 默认cpu，有显卡改为cuda
+
 ```
 
 ### 使用 Docker Compose 部署
