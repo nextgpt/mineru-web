@@ -71,11 +71,6 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_DEFAULT_BUCKETS: mds
-      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
-      MINIO_SERVER_URL: http://localhost:9000
-      MINIO_POLICY_NAME: public
-      MINIO_POLICY_DOCUMENT: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::mds/*"]}]}'
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"

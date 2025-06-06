@@ -80,7 +80,19 @@ cp magic-pdf.example.json magic-pdf.json
 ```bash
 # 启动服务
 docker-compose up -d
+
+# 参考以下网址安装mc
+https://min.io/docs/minio/linux/reference/minio-mc.html
+
+# 添加minio的alias
+mc alias set local http://localhost:9000 minioadmin minioadmin
+
+# 设置mds桶为public
+mc anonymous set download local/mds
+
 ```
+
+
 
 ### 界面展示
 
