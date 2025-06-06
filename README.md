@@ -160,9 +160,6 @@ mineru-web/
 - [vue3](https://github.com/vuejs/core)
 ---
 
-<div align="center">
-  <sub>Built with ❤️ by the MinerU Team</sub>
-</div>
 
 ## 📈 Star 趋势
 
