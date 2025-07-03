@@ -100,10 +100,21 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { FolderOpened, Menu, Back, Loading } from '@element-plus/icons-vue'
 import axios from 'axios'
-import { marked } from 'marked'
+// import { marked } from 'marked'
+import MarkdownIt from 'markdown-it'
+import mk from 'markdown-it-katex'
+import 'katex/dist/katex.min.css'
 import mammoth from 'mammoth'
 import * as XLSX from 'xlsx'
 import { getUserId } from '@/utils/user'
+
+
+// 创建带公式支持的 Markdown 渲染器
+const md = MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+}).use(mk)
 
 interface FileItem {
   id: string
@@ -393,8 +404,11 @@ const loadMarkdownByPage = async () => {
   }
 }
 
+// const renderedContent = computed(() => {
+//   return marked(parsedContent.value || '')
+// })
 const renderedContent = computed(() => {
-  return marked(parsedContent.value || '')
+  return md.render(parsedContent.value || '')
 })
 </script>
 

@@ -158,6 +158,7 @@ class ParserService:
 
                 if f_dump_md:
                     md_content_str = pipeline_union_make(pdf_info, f_make_md_mode, "images")
+                    md_content_str = modify_markdown_image_urls(md_content_str, mds_bucket)
                     md_content_list.append(md_content_str)
                     md_writer.write_string(
                         f"{pdf_file_name}.md",
@@ -202,6 +203,7 @@ class ParserService:
 
                 if f_dump_md:
                     md_content_str = vlm_union_make(pdf_info, f_make_md_mode, "images")
+                    md_content_str = modify_markdown_image_urls(md_content_str, mds_bucket)
                     md_content_list.append(md_content_str)
                     md_writer.write_string(
                         f"{pdf_file_name}.md",
@@ -254,7 +256,7 @@ class ParserService:
 
             page_markdown = make_blocks_to_markdown(paras_of_layout, MakeMode.MM_MD, "images")
             if keep_page:
-                output_content.extend(f"{{{page_idx}}}{'-'*48}")
+                output_content.append(f"{{{page_idx}}}{'-' * 48}")
             output_content.extend(page_markdown)
         return '\n\n'.join(output_content)
 
