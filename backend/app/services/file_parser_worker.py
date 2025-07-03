@@ -20,6 +20,8 @@ from app.services.parser import ParserService
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./mineru.db')
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
+# 批处理文件数
+WORK_BATCH = os.getenv("WORK_BATCH", 1)
 
 # Redis Stream 配置
 PARSER_STREAM = "file_parser_stream"
@@ -87,7 +89,7 @@ def run_worker():
                     PARSER_STREAM,
                     CONSUMER_GROUP,
                     CONSUMER_NAME,
-                    count=1,
+                    count=WORK_BATCH,
                     block=1000  # 阻塞1秒等待新消息
                 )
                 if messages:

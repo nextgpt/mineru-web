@@ -1,10 +1,5 @@
+mineru[core]
 alembic==1.16.1
-fastapi==0.115.12
-huggingface-hub==0.32.3
-magic-pdf[full]
 minio==7.2.15
-python-multipart==0.0.20
 SQLAlchemy==2.0.41
-uvicorn==0.34.3
-numpy<2
 redis

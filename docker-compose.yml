@@ -1,66 +1,66 @@
 version: '3.8'
 
 services:
-  frontend:
-    image: lpdswing/mineru-web-frontend:latest
-    ports:
-      - "8088:80"
-    depends_on:
-      - backend
-      - minio
-    networks:
-      - mineru-network
+#  frontend:
+#    image: lpdswing/mineru-web-frontend:latest
+#    ports:
+#      - "8088:80"
+#    depends_on:
+#      - backend
+#      - minio
+#    networks:
+#      - mineru-network
 
-  backend:
-    image: lpdswing/mineru-web-backend:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    environment:
-      - REDIS_HOST=redis
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
-      - DATABASE_URL=sqlite:///./mineru.db
-    volumes:
-      - ./backend:/app
-      - ./magic-pdf.json:/root/magic-pdf.json
-      - ./models:/models
-    depends_on:
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    networks:
-      - mineru-network
+#  backend:
+#    image: lpdswing/mineru-web-backend:latest
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - driver: nvidia
+#              count: 1
+#              capabilities: [gpu]
+#    environment:
+#      - REDIS_HOST=redis
+#      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+#      - DATABASE_URL=sqlite:///./mineru.db
+#    volumes:
+#      - ./backend:/app
+#      - ./mineru.json:/root/mineru.json
+#      - ./models2.0:/models
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+#      minio:
+#        condition: service_healthy
+#    networks:
+#      - mineru-network
 
-  worker:
-    image: lpdswing/mineru-web-backend:latest
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    command: python run_worker.py
-    environment:
-      - REDIS_HOST=redis
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
-      - DATABASE_URL=sqlite:///./mineru.db
-    volumes:
-      - ./backend:/app
-      - ./magic-pdf.json:/root/magic-pdf.json
-      - ./models:/models
-    depends_on:
-      redis:
-        condition: service_healthy
-      minio:
-        condition: service_healthy
-    networks:
-      - mineru-network
+#  worker:
+#    image: lpdswing/mineru-web-backend:latest
+#    deploy:
+#      resources:
+#        reservations:
+#          devices:
+#            - driver: nvidia
+#              count: 1
+#              capabilities: [gpu]
+#    command: python run_worker.py
+#    environment:
+#      - REDIS_HOST=redis
+#      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
+#      - DATABASE_URL=sqlite:///./mineru.db
+#    volumes:
+#      - ./backend:/app
+#      - ./mineru.json:/root/mineru.json
+#      - ./models2.0:/models
+#    depends_on:
+#      redis:
+#        condition: service_healthy
+#      minio:
+#        condition: service_healthy
+#    networks:
+#      - mineru-network
 
   redis:
     image: redis:latest
