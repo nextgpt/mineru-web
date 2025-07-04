@@ -12,7 +12,8 @@ COPY requirements.txt .
 RUN python3 -m pip install -U -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --break-system-packages
 
 # Download models and update the configuration file
-RUN /bin/bash -c "mineru-models-download -s modelscope -m all"
+# 模型文件外部挂载
+# RUN /bin/bash -c "mineru-models-download -s modelscope -m all"
 
 # 复制应用代码和启动脚本
 COPY . .
