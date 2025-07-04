@@ -109,6 +109,14 @@
             inactive-text="关闭"
           />
         </el-form-item>
+        <el-form-item label="后端引擎">
+          <el-select v-model="settings.backend" class="settings-select">
+            <el-option label="Pipeline" value="pipeline" />
+            <el-option label="VLM Transformers" value="vlm-transformers" />
+            <el-option label="VLM SgLang Engine" value="vlm-sglang-engine" />
+            <el-option label="VLM SgLang Client" value="vlm-sglang-client" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="saveSettings" size="large">保存设置</el-button>
           <el-button @click="resetSettings" size="large">重置</el-button>
@@ -129,13 +137,17 @@ interface Settings {
   ocrLanguage: string
   formulaRecognition: boolean
   tableRecognition: boolean
+  version: string
+  backend: 'pipeline' | 'vlm-transformers' | 'vlm-sglang-engine' | 'vlm-sglang-client'
 }
 
 const defaultSettings: Settings = {
   forceOcr: false,
   ocrLanguage: 'auto',
   formulaRecognition: true,
-  tableRecognition: true
+  tableRecognition: true,
+  version: '',
+  backend: 'pipeline'
 }
 
 const settings = ref<Settings>({ ...defaultSettings })
@@ -153,7 +165,9 @@ const loadSettings = async () => {
       forceOcr: response.data.force_ocr,
       ocrLanguage: response.data.ocr_lang,
       formulaRecognition: response.data.formula_recognition,
-      tableRecognition: response.data.table_recognition
+      tableRecognition: response.data.table_recognition,
+      version: response.data.version || '',
+      backend: response.data.backend || 'pipeline'
     }
   } catch (error: any) {
     console.error('加载设置失败:', error.response?.data || error.message)
@@ -169,6 +183,8 @@ const saveSettings = async () => {
       ocr_lang: settings.value.ocrLanguage,
       formula_recognition: settings.value.formulaRecognition,
       table_recognition: settings.value.tableRecognition,
+      version: settings.value.version,
+      backend: settings.value.backend,
       user_id: getUserId()
     }, {
       headers: {
@@ -228,4 +244,4 @@ onMounted(() => {
 :deep(.el-form-item__content) {
   justify-content: flex-start;
 }
-</style> 
+</style>

@@ -22,10 +22,11 @@ def get_settings(user_id: str = Depends(get_user_id)):
         return {
             "user_id": user_id,
             "ocr_enabled": True,
-            "ocr_lang": "auto",
+            "ocr_lang": "ch",
             "force_ocr": False,
-            "table_recognition": False,
-            "formula_recognition": False
+            "table_recognition": True,
+            "formula_recognition": True,
+            "backend": "pipeline"
         }
     return settings.to_dict()
 
