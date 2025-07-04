@@ -10,6 +10,10 @@ class FileStatus(enum.Enum):
     PARSED = 'parsed'
     PARSE_FAILED = 'parse_failed'
 
+class BackendType(enum.Enum):
+    PIPELINE = 'pipeline'
+    VLM = 'vlm'
+
 class File(Base):
     __tablename__ = 'files'
 
@@ -21,6 +25,8 @@ class File(Base):
     upload_time = Column(DateTime, default=datetime.utcnow)
     minio_path = Column(String(512), nullable=False)
     content_type = Column(String(64), nullable=True)
+    version = Column(String(32), nullable=True)
+    backend = Column(Enum(BackendType), default=BackendType.PIPELINE)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -33,5 +39,7 @@ class File(Base):
             'status': self.status.value if self.status else None,
             'upload_time': self.upload_time.isoformat() if self.upload_time else None,
             'minio_path': self.minio_path,
-            'content_type': self.content_type
-        } 
+            'content_type': self.content_type,
+            'version': self.version,
+            'backend': self.backend.value if self.backend else None
+        }
