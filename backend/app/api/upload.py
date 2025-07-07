@@ -1,7 +1,8 @@
 import traceback
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.file import File as FileModel, FileStatus
+from app.models.file import File as FileModel, FileStatus, BackendType as FileBackendType
+from app.models.settings import Settings, BackendType
 from app.utils.minio_client import upload_file
 from app.utils.user_dep import get_user_id
 from app.services.parser import ParserService
@@ -38,6 +39,15 @@ async def upload_files(
                 unique_filename,
                 file.content_type
             )
+            settings = db.query(Settings).filter(Settings.user_id == user_id).first()
+            backend = FileBackendType.PIPELINE
+            if settings:
+            
+                if settings.backend == BackendType.PIPELINE:
+                    backend = FileBackendType.PIPELINE
+                else:
+                    backend = FileBackendType.VLM
+
             
             # 保存到数据库
             db_file = FileModel(
@@ -47,7 +57,8 @@ async def upload_files(
                 status=FileStatus.PENDING,
                 upload_time=datetime.utcnow(),
                 minio_path=unique_filename,
-                content_type=file.content_type
+                content_type=file.content_type,
+                backend=backend
             )
             db.add(db_file)
             db.commit()

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /opt/mineru_venv/bin/activate
+export MINERU_MODEL_SOURCE=local
 
 if [ "$1" = "python" ]; then
   exec "$@"

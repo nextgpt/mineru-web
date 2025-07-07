@@ -16,7 +16,7 @@
         :on-change="handleFileChange"
         :on-remove="handleFileRemove"
         :before-upload="beforeUpload"
-        accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg,.jpeg"
+        accept=".pdf,.png,.jpg,.jpeg"
         multiple
         :limit="20"
         :disabled="uploading"

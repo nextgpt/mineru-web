@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlalchemy.orm import Session
-from app.models.settings import Settings
+from app.models.settings import Settings, BackendType
 from app.utils.user_dep import get_user_id
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -16,18 +16,20 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=True, bind=engine)
 def get_settings(user_id: str = Depends(get_user_id)):
     db = SessionLocal()
     settings = db.query(Settings).filter(Settings.user_id == user_id).first()
-    db.close()
+
     if not settings:
-        # 返回默认设置
-        return {
-            "user_id": user_id,
-            "ocr_enabled": True,
-            "ocr_lang": "auto",
-            "force_ocr": False,
-            "table_recognition": False,
-            "formula_recognition": False
-        }
-    return settings.to_dict()
+        settings = Settings(
+            user_id=user_id,
+            ocr_lang="ch",
+            force_ocr=False,
+            table_recognition=True,
+            formula_recognition=True,
+            backend=BackendType.PIPELINE
+        )
+    
+    result = settings.to_dict()
+    db.close()
+    return result
 
 @router.put("/settings")
 def update_settings(
@@ -39,13 +41,19 @@ def update_settings(
     if not db_settings:
         db_settings = Settings(user_id=user_id)
         db.add(db_settings)
-    
-    # 更新设置
+
     for key, value in settings.items():
         if hasattr(db_settings, key):
-            setattr(db_settings, key, value)
+            if key == "backend":
+                try:
+                    setattr(db_settings, key, BackendType(value))  # 字符串转 Enum
+                except ValueError:
+                    db.close()
+                    raise HTTPException(status_code=400, detail=f"Invalid backend type: {value}")
+            else:
+                setattr(db_settings, key, value)
     
     db.commit()
     db.refresh(db_settings)
     db.close()
-    return db_settings.to_dict() 
+    return db_settings.to_dict()

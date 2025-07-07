@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    image: lpdswing/mineru-web-frontend:latest
+    image: lpdswing/mineru-web-frontend:v2.0
     ports:
       - "8088:80"
     depends_on:
@@ -12,7 +12,7 @@ services:
       - mineru-network
 
   backend:
-    image: lpdswing/mineru-web-backend:latest
+    image: lpdswing/mineru-web-backend:v2.0
     deploy:
       resources:
         reservations:
@@ -24,10 +24,14 @@ services:
       - REDIS_HOST=redis
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
       - DATABASE_URL=sqlite:///./mineru.db
+      # 按需配置
+      # - BACKEND=sglang-engine
+      # - MODEL_PATH=/models/vlm
+      # - SERVER_URL=http://127.0.0.1:30000
     volumes:
       - ./backend:/app
-      - ./magic-pdf.json:/root/magic-pdf.json
-      - ./models:/models
+      - ./mineru.json:/root/mineru.json
+      - ./models2.0:/models
     depends_on:
       redis:
         condition: service_healthy
@@ -37,7 +41,7 @@ services:
       - mineru-network
 
   worker:
-    image: lpdswing/mineru-web-backend:latest
+    image: lpdswing/mineru-web-backend:v2.0
     deploy:
       resources:
         reservations:
@@ -50,10 +54,13 @@ services:
       - REDIS_HOST=redis
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
       - DATABASE_URL=sqlite:///./mineru.db
+      # 按需配置
+      - SERVER_URL=http://127.0.0.1:30000  # sglang server服务地址
+
     volumes:
       - ./backend:/app
-      - ./magic-pdf.json:/root/magic-pdf.json
-      - ./models:/models
+      - ./mineru.json:/root/mineru.json
+      - ./models2.0:/models
     depends_on:
       redis:
         condition: service_healthy

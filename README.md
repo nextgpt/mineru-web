@@ -47,7 +47,10 @@ git clone https://github.com/lpdswing/mineru-web.git
 cd mineru-web
 
 # 下载模型文件
-python download_models.py
+# 更新为2.0模型
+python download_models.py modelscope
+或
+python download_models.py huggingface
 ```
 
 2. 配置 MinIO 地址：
@@ -63,7 +66,7 @@ MINIO_ENDPOINT=your-minio-address:9000
 
 ```bash
 # 复制magic-pdf配置文件模板
-cp magic-pdf.example.json magic-pdf.json
+cp mineru.example.json mineru.json
 
 # 修改endpoint
     "bucket_info": {
@@ -166,6 +169,20 @@ mineru-web/
 ## 📄 开源协议
 
 本项目采用 AGPL-3.0 协议开源，详情请参见 [LICENSE](LICENSE) 文件。
+
+## 📝 更新日志
+
+### [2.0.0] - 2025-07-07
+- 后端
+  - 适配Mineru 2.1.0版本
+  - 更新模型下载脚本
+  - 更新设置支持pipeline和vlm-*动态更新
+  - 后端支持预加载vlm模型
+- 前端
+  - 更换markdown显示插件为mark-it-down,支持公式展示
+  - 文件列表增加backend标签
+
+
 
 ## 🌟 致谢
 
