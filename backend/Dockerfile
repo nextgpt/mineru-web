@@ -1,6 +1,8 @@
 # Use the official sglang image
-FROM lmsysorg/sglang:v0.4.7-cu124
+FROM lmsysorg/sglang:v0.4.8.post1-cu126
 
+# Install libgl for opencv support
+RUN apt-get update && apt-get install -y libgl1 && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
 WORKDIR /app

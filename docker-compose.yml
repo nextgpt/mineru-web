@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    image: lpdswing/mineru-web-frontend:latest
+    image: lpdswing/mineru-web-frontend:v2.0
     ports:
       - "8088:80"
     depends_on:
@@ -12,7 +12,7 @@ services:
       - mineru-network
 
   backend:
-    image: lpdswing/mineru-web-backend:latest
+    image: lpdswing/mineru-web-backend:v2.0
     deploy:
       resources:
         reservations:
@@ -41,7 +41,7 @@ services:
       - mineru-network
 
   worker:
-    image: lpdswing/mineru-web-backend:latest
+    image: lpdswing/mineru-web-backend:v2.0
     deploy:
       resources:
         reservations:
