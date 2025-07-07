@@ -42,7 +42,21 @@
       </div>
       <el-table :data="files" border stripe v-if="files && files.length > 0 && !loading" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="48" />
-        <el-table-column prop="filename" label="文件名称" />
+        <el-table-column prop="filename" label="文件名称">
+          <template #default="{ row }">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <el-tag
+                v-if="row.backend"
+                size="small"
+                :color="getBackendColor(row.backend)"
+                style="color: white; border: none; padding: 0 6px; height: 20px; line-height: 20px;"
+              >
+                {{ getBackendIcon(row.backend) }}
+              </el-tag>
+              <span>{{ row.filename }}</span>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="size" label="大小" width="120">
           <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
         </el-table-column>
@@ -118,6 +132,7 @@ interface FileItem {
   size: number
   uploadTime: string
   status: 'pending' | 'parsing' | 'parsed' | 'parse_failed'
+  backend?: string  // 添加backend字段
 }
 
 const files = ref<FileItem[]>([])
@@ -189,6 +204,28 @@ const getStatusText = (status: string) => {
     parse_failed: '解析失败'
   }
   return map[status] || '未知状态'
+}
+
+const getBackendIcon = (backend?: string) => {
+  switch (backend) {
+    case 'pipeline':
+      return 'Pipeline'
+    case 'vlm':
+      return 'VLM'
+    default:
+      return ''
+  }
+}
+
+const getBackendColor = (backend?: string) => {
+  switch (backend) {
+    case 'pipeline':
+      return '#409EFF'  // 蓝色
+    case 'vlm':
+      return '#67C23A'  // 绿色
+    default:
+      return '#909399'  // 灰色
+  }
 }
 
 const openPreview = (file: FileItem) => {
@@ -578,4 +615,13 @@ watch([() => params.page, () => params.pageSize], () => {
 :deep(.el-table__body-wrapper) {
   overflow-y: auto;
 }
-</style> 
+
+:deep(.el-tag) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+</style>

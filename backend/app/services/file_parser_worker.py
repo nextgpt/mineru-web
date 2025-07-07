@@ -2,6 +2,8 @@ import os
 import sys
 import json
 import time
+import torch
+import gc
 from loguru import logger
 
 # 添加项目根目录到 Python 路径
@@ -15,6 +17,14 @@ from sqlalchemy.orm import sessionmaker
 from app.utils.redis_client import redis_client
 from app.models.file import File as FileModel, FileStatus
 from app.services.parser import ParserService
+
+
+
+def clean_memory():
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
+    gc.collect()
 
 # 数据库连接配置
 DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///./mineru.db')
@@ -122,7 +132,9 @@ def run_worker():
         logger.error(f"Worker error: {e}")
     finally:
         # 清理资源
+        logger.info("清理资源。。。")
         db.close()
+        clean_memory()
 
 if __name__ == "__main__":
     run_worker() 

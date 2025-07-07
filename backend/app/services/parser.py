@@ -130,6 +130,7 @@ class ParserService:
             md_writer=None,
             image_writer=None,
             mds_bucket="mds",  # 默认存储的bucket
+            predictor=None,  # 可以预加载vlm模型传入
     ):
         md_content_list = []
         if backend == "pipeline":
@@ -193,12 +194,13 @@ class ParserService:
         else:
             if backend.startswith("vlm-"):
                 backend = backend[4:]
-
+            conf = read_config()
+            model_path = conf.get("models-dir", {}).get("vlm", '')
             for idx, pdf_bytes in enumerate(pdf_bytes_list):
                 pdf_file_name = pdf_file_names[idx]
                 pdf_bytes = convert_pdf_bytes_to_bytes_by_pypdfium2(pdf_bytes, start_page_id, end_page_id)
-                middle_json, infer_result = vlm_doc_analyze(pdf_bytes, image_writer=image_writer, backend=backend,
-                                                            server_url=server_url)
+                middle_json, infer_result = vlm_doc_analyze(pdf_bytes, image_writer=image_writer, predictor=predictor, backend=backend,
+                                                             model_path=model_path, server_url=server_url)
                 pdf_info = middle_json["pdf_info"]
 
                 if f_dump_md:
@@ -273,7 +275,8 @@ class ParserService:
             md_writer: DataWriter,
             backend: str,
             server_url: str,
-            mds_bucket: str
+            mds_bucket: str,
+            predictor,
     ):
         """处理文件内容
         Args:
@@ -289,6 +292,7 @@ class ParserService:
             backend: 解析后端
             server_url: 当backend是 `sglang-client`时候, 需指定, 例如:`http://127.0.0.1:30000`
             mds_bucket: md存储桶
+            predictor: vlm模型
         """
 
         try:
@@ -314,13 +318,14 @@ class ParserService:
                 server_url=server_url,
                 md_writer=md_writer,
                 image_writer=image_writer,
-                mds_bucket=mds_bucket
+                mds_bucket=mds_bucket,
+                predictor=predictor
             )
         except Exception as e:
             logger.exception(f"处理文件失败: {str(e)}")
             raise
 
-    def parse_file(self, file: FileModel, user_id: str, parse_method: str = "auto") -> Dict[str, Any]:
+    def parse_file(self, file: FileModel, user_id: str, parse_method: str = "auto", predictor=None) -> Dict[str, Any]:
         """同步解析文件"""
         try:
             # 获取用户设置，如果没有则使用默认配置
@@ -329,7 +334,7 @@ class ParserService:
                 user_settings = Settings(
                     user_id=user_id,
                     force_ocr=False,
-                    ocr_lang='auto',
+                    ocr_lang='ch',
                     formula_recognition=True,
                     table_recognition=True
                 )
@@ -337,7 +342,7 @@ class ParserService:
             logger.info(settings)
             if settings.get('force_ocr', False):
                 parse_method = 'ocr'
-            # TODO backend做成配置
+            # backend做成配置
             backend = settings.get("backend", "pipeline")
             # 更新文件状态为解析中
             file.status = FileStatus.PARSING
@@ -380,14 +385,15 @@ class ParserService:
                     file_bytes,
                     file_extension,
                     parse_method,
-                    settings.get('ocr_lang', 'auto'),
+                    settings.get('ocr_lang', 'ch'),
                     settings.get('formula_recognition', True),
                     settings.get('table_recognition', True),
                     image_writer,
                     md_content_writer_s3,
                     backend=backend,
                     server_url=SERVER_URL,
-                    mds_bucket=mds_bucket
+                    mds_bucket=mds_bucket,
+                    predictor=predictor
                 )
                 # 保存解析结果到数据库
                 parsed_content = ParsedContent(
@@ -474,6 +480,6 @@ if __name__ == "__main__":
     ParserService.do_parse(
         ['preview.png'],
         [file_bytes],
-        p_lang_list=['auto'],
+        p_lang_list=['ch'],
 
     )

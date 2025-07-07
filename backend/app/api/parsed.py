@@ -1,5 +1,5 @@
 import traceback
-from fastapi import APIRouter, Query, HTTPException, Body, Response, Depends
+from fastapi import APIRouter, Query, HTTPException, Body, Response, Depends, Request
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 from app.models.parsed_content import ParsedContent
@@ -42,6 +42,7 @@ def get_parsed_content(
 
 @router.post("/files/{file_id}/parse")
 def parse_file(
+    request: Request,
     file_id: int,
     user_id: str = Depends(get_user_id)
 ):
@@ -60,7 +61,7 @@ def parse_file(
         
         # 执行解析
         parser = ParserService(db)
-        result = parser.parse_file(file, user_id)
+        result = parser.parse_file(file, user_id, predictor=request.app.state.predictor)
         
         return {
             "msg": "解析完成",

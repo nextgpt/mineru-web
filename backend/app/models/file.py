@@ -41,5 +41,5 @@ class File(Base):
             'minio_path': self.minio_path,
             'content_type': self.content_type,
             'version': self.version,
-            'backend': self.backend.value if self.backend else None
+            'backend': self.backend.value if self.backend else BackendType.PIPELINE.value
         }
