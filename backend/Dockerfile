@@ -11,7 +11,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # 安装 Python 依赖
-RUN python3 -m pip install -U -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --break-system-packages
+RUN python3 -m pip install -U -r requirements.txt --break-system-packages
 
 # Download models and update the configuration file
 # 模型文件外部挂载
