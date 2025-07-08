@@ -25,9 +25,9 @@ services:
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
       - DATABASE_URL=sqlite:///./mineru.db
       # 按需配置
-      # - BACKEND=sglang-engine
+      - BACKEND=sglang-client  # 只能用client，uvicorn无法在子进程加载vlm模型
       # - MODEL_PATH=/models/vlm
-      # - SERVER_URL=http://127.0.0.1:30000
+      - SERVER_URL=http://mineru-sglang:30000
     volumes:
       - ./backend:/app
       - ./mineru.json:/root/mineru.json
@@ -36,6 +36,8 @@ services:
       redis:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      mineru-sglang:
         condition: service_healthy
     networks:
       - mineru-network
@@ -55,7 +57,7 @@ services:
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
       - DATABASE_URL=sqlite:///./mineru.db
       # 按需配置
-      - SERVER_URL=http://127.0.0.1:30000  # sglang server服务地址
+      - SERVER_URL=http://mineru-sglang:30000  # sglang server服务地址
 
     volumes:
       - ./backend:/app
@@ -66,8 +68,47 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      mineru-sglang:
+        condition: service_healthy
     networks:
       - mineru-network
+
+# Documentation:
+# https://docs.sglang.ai/backend/server_arguments.html#common-launch-commands
+  mineru-sglang:
+    image: lpdswing/mineru-web-backend:v2.0.0
+    container_name: mineru-sglang
+    restart: always
+    ports:
+      - 30000:30000
+    environment:
+      MINERU_MODEL_SOURCE: local
+    entrypoint: mineru-sglang-server
+    volumes:
+      - ./mineru.json:/root/mineru.json
+      - ./models2.0:/models
+    command:
+      --host 0.0.0.0
+      --port 30000
+      # --enable-torch-compile  # You can also enable torch.compile to accelerate inference speed by approximately 15%
+      # --dp-size 2  # If using multiple GPUs, increase throughput using sglang's multi-GPU parallel mode
+      # --tp-size 2  # If you have more than one GPU, you can expand available VRAM using tensor parallelism (TP) mode.
+      # --mem-fraction-static 0.5  # If running on a single GPU and encountering VRAM shortage, reduce the KV cache size by this parameter, if VRAM issues persist, try lowering it further to `0.4` or below.
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host
+    networks:
+      - mineru-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:30000/health || exit 1"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]
 
   redis:
     image: redis:latest

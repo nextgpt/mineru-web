@@ -27,7 +27,7 @@
         </div>
         <template #tip>
           <div class="el-upload__tip">
-            支持的文件类型：PDF、Word、PowerPoint、PNG、JPG
+            支持的文件类型：PDF、PNG、JPG、JPEG
             <br>
             单个文档不超过 <b>200M</b> 或 <b>600</b> 页，单图片不超过 <b>10M</b>，单次最多 <b>20</b> 个文件
           </div>
@@ -126,7 +126,7 @@ const beforeUpload = (file: File) => {
     // PDF
     '.pdf',
     // Office (Word & PowerPoint)
-    '.doc', '.docx', '.ppt', '.pptx',
+    // '.doc', '.docx', '.ppt', '.pptx',
     // 图片
     '.png', '.jpg', '.jpeg'
   ]
