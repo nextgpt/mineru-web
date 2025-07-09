@@ -62,10 +62,10 @@ cp .env.example .env
 MINIO_ENDPOINT=your-minio-address:9000
 ```
 
-3. 配置magic-pdf.json
+3. 配置mineru.json
 
 ```bash
-# 复制magic-pdf配置文件模板
+# 复制mineru配置文件模板
 cp mineru.example.json mineru.json
 
 # 修改endpoint
@@ -76,7 +76,6 @@ cp mineru.example.json mineru.json
             "http://your-minio-address:9000"
         ]
     },
-    "device-mode": "cpu", # 默认cpu，有显卡改为cuda
 
 ```
 
