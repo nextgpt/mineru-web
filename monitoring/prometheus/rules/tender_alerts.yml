@@ -1,0 +1,123 @@
+groups:
+  - name: tender_system_alerts
+    rules:
+      # 系统资源告警
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高CPU使用率"
+          description: "实例 {{ $labels.instance }} CPU使用率超过80%，当前值: {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高内存使用率"
+          description: "实例 {{ $labels.instance }} 内存使用率超过85%，当前值: {{ $value }}%"
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 15
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "磁盘空间不足"
+          description: "实例 {{ $labels.instance }} 磁盘 {{ $labels.mountpoint }} 可用空间低于15%"
+
+  - name: tender_application_alerts
+    rules:
+      # 应用服务告警
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务不可用"
+          description: "服务 {{ $labels.job }} 实例 {{ $labels.instance }} 已停止响应"
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "高错误率"
+          description: "服务 {{ $labels.job }} 5xx错误率超过5%，当前值: {{ $value }}%"
+
+      - alert: SlowResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "响应时间过慢"
+          description: "服务 {{ $labels.job }} 95%响应时间超过2秒，当前值: {{ $value }}s"
+
+  - name: tender_database_alerts
+    rules:
+      # 数据库告警
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis服务不可用"
+          description: "Redis实例 {{ $labels.instance }} 无法连接"
+
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis内存使用率过高"
+          description: "Redis实例 {{ $labels.instance }} 内存使用率超过90%"
+
+  - name: tender_storage_alerts
+    rules:
+      # 存储告警
+      - alert: MinIODown
+        expr: minio_cluster_nodes_offline_total > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MinIO节点离线"
+          description: "MinIO集群有 {{ $value }} 个节点离线"
+
+      - alert: MinIOHighDiskUsage
+        expr: minio_cluster_disk_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "MinIO磁盘使用率过高"
+          description: "MinIO集群磁盘使用率超过85%，当前值: {{ $value }}%"
+
+  - name: tender_task_alerts
+    rules:
+      # 任务处理告警
+      - alert: TaskQueueBacklog
+        expr: redis_list_length{key="task_queue"} > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "任务队列积压"
+          description: "任务队列中有 {{ $value }} 个待处理任务"
+
+      - alert: TaskFailureRate
+        expr: rate(task_failures_total[5m]) / rate(task_total[5m]) * 100 > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "任务失败率过高"
+          description: "任务失败率超过10%，当前值: {{ $value }}%"
