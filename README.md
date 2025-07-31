@@ -83,7 +83,10 @@ cp mineru.example.json mineru.json
 
 ```bash
 # 启动服务
+# 默认不启动vlm服务
 docker-compose up -d
+# 启动vlm服务
+docker-compose -f docker-compose.yml -f docker-compose.sglang.yaml up -d
 
 # 参考以下网址安装mc
 https://min.io/docs/minio/linux/reference/minio-mc.html
