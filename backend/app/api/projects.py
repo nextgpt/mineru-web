@@ -1242,8 +1242,8 @@ def perform_analysis_task(project_id: int, user_id: str, content: str):
     
     finally:
         db.close()
-# Docu
-ment management endpoints
+
+# Document management endpoints
 @router.get("/projects/{project_id}/documents")
 def get_project_documents(
     project_id: int,
