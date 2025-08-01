@@ -70,8 +70,8 @@ interface Props {
   project: Project
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<{
+defineProps<Props>()
+defineEmits<{
   refresh: []
 }>()
 

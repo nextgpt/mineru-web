@@ -168,7 +168,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import { Upload, Document, Setting } from '@element-plus/icons-vue'
@@ -290,7 +290,7 @@ const viewProject = (project: Project) => {
 }
 
 // 编辑项目
-const editProject = (project: Project) => {
+const editProject = (_project: Project) => {
   // TODO: 实现编辑功能
   ElMessage.info('编辑功能开发中...')
 }

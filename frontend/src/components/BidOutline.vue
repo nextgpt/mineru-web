@@ -29,7 +29,7 @@
         default-expand-all
         class="outline-tree-component"
       >
-        <template #default="{ node, data }">
+        <template #default="{ data }">
           <div class="outline-node">
             <div class="node-content">
               <span class="node-sequence">{{ data.sequence }}</span>
