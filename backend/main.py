@@ -10,6 +10,10 @@ from app.api.health import router as health_router
 from app.api.projects import router as projects_router
 from contextlib import asynccontextmanager
 from mineru.cli.fast_api import parse_pdf
+from dotenv import load_dotenv
+
+# 加载环境变量
+load_dotenv()
 
 
 BACKEND = os.environ.get("BACKEND", "sglang-client")
