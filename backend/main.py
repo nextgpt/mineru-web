@@ -9,7 +9,6 @@ from app.api import task, stats
 from app.api.health import router as health_router
 from app.api.projects import router as projects_router
 from contextlib import asynccontextmanager
-from mineru.cli.fast_api import parse_pdf
 from dotenv import load_dotenv
 
 # 加载环境变量
@@ -29,17 +28,11 @@ def clean_memory():
 
 @asynccontextmanager
 async def life_span(app: FastAPI):
-    if not PRELOAD_MODEL:
-        print("🔄 不预加载模型...")
-        app.state.predictor = None
-    else:
-        print("🔄 正在加载模型...")
-        from mineru.backend.vlm.vlm_analyze import ModelSingleton
-
-        app.state.predictor = ModelSingleton().get_model(BACKEND, MODEL_PATH, SERVER_URL)
-        print("✅ 模型加载完成")
+    print("🔄 启动 MinerU Web 后端服务...")
+    # 由于 MinerU 服务已在其他服务器部署，这里不需要加载本地模型
+    app.state.predictor = None
     yield
-    print("🚪 应用退出，清理模型")
+    print("🚪 应用退出，清理资源")
     clean_memory()
 
 
@@ -69,9 +62,6 @@ app.include_router(projects_router, prefix="/api", tags=["projects"])
 @app.get("/ping")
 def ping():
     return {"msg": "pong"}
-
-
-app.add_api_route("/api/file_parse", parse_pdf, methods=['POST'])
 
 if __name__ == "__main__":
     import uvicorn
