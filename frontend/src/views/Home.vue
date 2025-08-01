@@ -22,20 +22,6 @@
 
     <!-- 主要内容区域 -->
     <div class="main-content">
-      <!-- 背景装饰 -->
-      <div class="background-decoration">
-        <div class="decoration-left">
-          <div class="floating-element element-1"></div>
-          <div class="floating-element element-2"></div>
-          <div class="floating-element element-3"></div>
-        </div>
-        <div class="decoration-right">
-          <div class="floating-element element-4"></div>
-          <div class="floating-element element-5"></div>
-          <div class="floating-element element-6"></div>
-        </div>
-      </div>
-
       <!-- 中心内容 -->
       <div class="center-content">
         <div class="title-section">
@@ -352,96 +338,7 @@ const handleDialogClose = (done: () => void) => {
   position: relative;
 }
 
-.background-decoration {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
 
-.decoration-left,
-.decoration-right {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 300px;
-}
-
-.decoration-left {
-  left: -150px;
-}
-
-.decoration-right {
-  right: -150px;
-}
-
-.floating-element {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  animation: float 6s ease-in-out infinite;
-}
-
-.element-1 {
-  width: 80px;
-  height: 80px;
-  top: 20%;
-  left: 20%;
-  animation-delay: 0s;
-}
-
-.element-2 {
-  width: 120px;
-  height: 120px;
-  top: 60%;
-  left: 10%;
-  animation-delay: 2s;
-}
-
-.element-3 {
-  width: 60px;
-  height: 60px;
-  top: 80%;
-  left: 40%;
-  animation-delay: 4s;
-}
-
-.element-4 {
-  width: 100px;
-  height: 100px;
-  top: 30%;
-  right: 20%;
-  animation-delay: 1s;
-}
-
-.element-5 {
-  width: 140px;
-  height: 140px;
-  top: 70%;
-  right: 10%;
-  animation-delay: 3s;
-}
-
-.element-6 {
-  width: 70px;
-  height: 70px;
-  top: 10%;
-  right: 40%;
-  animation-delay: 5s;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-  }
-}
 
 .center-content {
   max-width: 800px;
@@ -457,7 +354,7 @@ const handleDialogClose = (done: () => void) => {
 .main-title {
   font-size: 48px;
   font-weight: 700;
-  color: white;
+  color: #1f2937;
   margin: 0 0 20px 0;
   line-height: 1.2;
 }
@@ -471,7 +368,7 @@ const handleDialogClose = (done: () => void) => {
 
 .subtitle {
   font-size: 18px;
-  color: rgba(255, 255, 255, 0.8);
+  color: #6b7280;
   line-height: 1.6;
   margin: 0;
   max-width: 600px;
@@ -483,12 +380,11 @@ const handleDialogClose = (done: () => void) => {
 }
 
 .upload-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: #fff;
   border-radius: 24px;
   padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e5e7eb;
 }
 
 .upload-dragger {
@@ -504,8 +400,8 @@ const handleDialogClose = (done: () => void) => {
 }
 
 .upload-dragger :deep(.el-upload-dragger:hover) {
-  border-color: #6366f1;
-  background: rgba(99, 102, 241, 0.05);
+  border-color: #409eff;
+  background: rgba(64, 158, 255, 0.05);
 }
 
 .upload-content {
@@ -556,7 +452,7 @@ const handleDialogClose = (done: () => void) => {
 }
 
 .highlight-text {
-  color: #6366f1;
+  color: #409eff;
   font-weight: 600;
 }
 
@@ -571,15 +467,14 @@ const handleDialogClose = (done: () => void) => {
   font-size: 16px;
   font-weight: 600;
   border-radius: 12px;
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+  background: #409eff;
   border: none;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  color: white;
   transition: all 0.3s ease;
 }
 
 .upload-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+  background: #337ecc;
 }
 
 .progress-section {
@@ -587,11 +482,11 @@ const handleDialogClose = (done: () => void) => {
 }
 
 .progress-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: #fff;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .upload-progress {
@@ -600,12 +495,12 @@ const handleDialogClose = (done: () => void) => {
 
 .upload-progress :deep(.el-progress-bar__outer) {
   border-radius: 8px;
-  background: rgba(99, 102, 241, 0.1);
+  background: #f0f2f5;
 }
 
 .upload-progress :deep(.el-progress-bar__inner) {
   border-radius: 8px;
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+  background: #409eff;
 }
 
 .progress-text {

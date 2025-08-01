@@ -7,8 +7,8 @@ const route = useRoute()
 
 const menuItems = [
   { icon: HomeFilled, path: '/', tooltip: '首页' },
-  { icon: FolderOpened, path: '/projects', tooltip: '项目管理' },
-  { icon: Document, path: '/files', tooltip: '文件管理' },
+  { icon: Document, path: '/projects', tooltip: '创建投标方案' },
+  { icon: FolderOpened, path: '/files', tooltip: '文件管理' },
   { icon: Upload, path: '/upload', tooltip: '上传' }
 ]
 
