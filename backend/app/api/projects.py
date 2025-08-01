@@ -1605,8 +1605,8 @@ def generate_document_task(project_id: int, user_id: str, outline_id: Optional[i
     
     finally:
         db.close()
-# Document 
-export endpoints
+
+# Document export endpoints
 @router.get("/projects/{project_id}/export")
 def export_project_document(
     project_id: int,
