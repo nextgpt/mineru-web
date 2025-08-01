@@ -4,7 +4,7 @@
 """
 import asyncio
 import aiohttp
-import aioredis
+import redis
 import psycopg2
 from typing import Dict, Any, List
 from loguru import logger
@@ -160,14 +160,14 @@ class HealthService:
             redis_port = int(os.getenv("REDIS_PORT", "16379"))
             
             # 创建Redis连接
-            redis = aioredis.from_url(
-                f"redis://{redis_host}:{redis_port}",
+            redis_client = redis.Redis(
+                host=redis_host,
+                port=redis_port,
                 decode_responses=True
             )
             
             # 执行ping命令
-            pong = await redis.ping()
-            await redis.close()
+            pong = redis_client.ping()
             
             if pong:
                 return {
