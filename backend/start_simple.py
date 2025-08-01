@@ -10,10 +10,10 @@ def main():
     
     # 设置环境变量
     os.environ.update({
-        'DATABASE_URL': 'postgresql://postgres:password@192.168.30.220:5432/bidgen',
+        'DATABASE_URL': 'postgresql://postgres:password@192.168.30.220:15432/bidgen',
         'REDIS_HOST': '192.168.30.220',
-        'REDIS_PORT': '6379',
-        'MINIO_ENDPOINT': '192.168.30.220:9000',
+        'REDIS_PORT': '16379',
+        'MINIO_ENDPOINT': '192.168.30.220:19000',
         'MINIO_ACCESS_KEY': 'minioadmin',
         'MINIO_SECRET_KEY': 'minioadmin',
         'MINIO_SECURE': 'false',

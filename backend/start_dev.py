@@ -29,7 +29,7 @@ def check_services():
     
     # 检查Redis连接
     try:
-        r = redis.Redis(host='192.168.30.220', port=6379, decode_responses=True)
+        r = redis.Redis(host='192.168.30.220', port=16379, decode_responses=True)
         r.ping()
         print("✅ Redis连接正常")
     except Exception as e:
@@ -40,7 +40,7 @@ def check_services():
     try:
         conn = psycopg2.connect(
             host='192.168.30.220',
-            port=5432,
+            port=15432,
             database='bidgen',
             user='postgres',
             password='password'
@@ -54,7 +54,7 @@ def check_services():
     # 检查MinIO连接
     try:
         client = Minio(
-            '192.168.30.220:9000',
+            '192.168.30.220:19000',
             access_key='minioadmin',
             secret_key='minioadmin',
             secure=False

@@ -13,7 +13,7 @@ def init_database():
     """初始化数据库"""
     try:
         # 设置环境变量
-        os.environ['DATABASE_URL'] = 'postgresql://postgres:password@192.168.30.220:5432/bidgen'
+        os.environ['DATABASE_URL'] = 'postgresql://postgres:password@192.168.30.220:15432/bidgen'
         
         # 导入数据库模块
         from app.database import create_tables, engine
