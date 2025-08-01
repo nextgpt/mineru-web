@@ -1,10 +1,11 @@
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 from app.models.bid_outline import BidOutline
+from app.models.bid_document import BidDocument, DocumentStatus
 from app.models.requirement_analysis import RequirementAnalysis
 from app.models.project import Project, ProjectStatus
 from app.services.llm_client import LLMClient
-from app.services.prompt_templates import get_bid_outline_template
+from app.services.prompt_templates import get_bid_outline_template, get_bid_content_template
 import logging
 import json
 import re
@@ -384,3 +385,413 @@ class BidGenerationService:
         
         # 如果没找到，返回默认值
         return "1.1"
+    
+    def generate_document_content(self, db: Session, project_id: int, user_id: str, 
+                                outline_id: int, regenerate: bool = False) -> Optional[BidDocument]:
+        """基于大纲节点生成文档内容"""
+        try:
+            logger.info(f"开始为项目 {project_id} 大纲节点 {outline_id} 生成文档内容")
+            
+            # 获取大纲节点
+            outline = db.query(BidOutline).filter(
+                BidOutline.id == outline_id,
+                BidOutline.project_id == project_id,
+                BidOutline.user_id == user_id
+            ).first()
+            
+            if not outline:
+                logger.error(f"大纲节点 {outline_id} 不存在")
+                return None
+            
+            # 检查是否已有文档
+            existing_doc = db.query(BidDocument).filter(
+                BidDocument.project_id == project_id,
+                BidDocument.user_id == user_id,
+                BidDocument.outline_id == outline_id
+            ).first()
+            
+            if existing_doc and not regenerate:
+                logger.info(f"大纲节点 {outline_id} 已有对应文档，跳过生成")
+                return existing_doc
+            
+            # 获取项目需求分析
+            analysis = db.query(RequirementAnalysis).filter(
+                RequirementAnalysis.project_id == project_id,
+                RequirementAnalysis.user_id == user_id
+            ).first()
+            
+            if not analysis:
+                logger.error(f"项目 {project_id} 需求分析不存在")
+                return None
+            
+            # 构建文档生成提示词
+            prompt = self._build_document_prompt(outline, analysis, db, project_id, user_id)
+            
+            # 调用大模型生成内容
+            content = self.llm_client.generate_content(prompt, max_tokens=3000)
+            
+            # 清理和优化内容
+            cleaned_content = self._clean_document_content(content)
+            
+            # 质量检查
+            quality_score = self._check_content_quality(cleaned_content, outline)
+            
+            if existing_doc:
+                # 更新现有文档
+                existing_doc.content = cleaned_content
+                existing_doc.status = DocumentStatus.GENERATED
+                existing_doc.version += 1
+                db.commit()
+                db.refresh(existing_doc)
+                
+                logger.info(f"大纲节点 {outline_id} 文档内容更新完成，质量评分: {quality_score}")
+                return existing_doc
+            else:
+                # 创建新文档
+                document = BidDocument(
+                    project_id=project_id,
+                    user_id=user_id,
+                    title=f"{outline.sequence} {outline.title}",
+                    content=cleaned_content,
+                    outline_id=outline_id,
+                    status=DocumentStatus.GENERATED,
+                    version=1
+                )
+                
+                db.add(document)
+                db.commit()
+                db.refresh(document)
+                
+                logger.info(f"大纲节点 {outline_id} 文档内容生成完成，质量评分: {quality_score}")
+                return document
+                
+        except Exception as e:
+            logger.error(f"生成文档内容失败: {str(e)}")
+            db.rollback()
+            return None
+    
+    def generate_all_documents(self, db: Session, project_id: int, user_id: str, 
+                             regenerate: bool = False) -> List[BidDocument]:
+        """生成所有大纲节点的文档内容"""
+        try:
+            logger.info(f"开始为项目 {project_id} 生成所有文档内容")
+            
+            # 获取所有大纲节点
+            outlines = db.query(BidOutline).filter(
+                BidOutline.project_id == project_id,
+                BidOutline.user_id == user_id
+            ).order_by(BidOutline.level, BidOutline.order_index).all()
+            
+            if not outlines:
+                logger.error(f"项目 {project_id} 没有大纲节点")
+                return []
+            
+            documents = []
+            for outline in outlines:
+                document = self.generate_document_content(
+                    db, project_id, user_id, outline.id, regenerate
+                )
+                if document:
+                    documents.append(document)
+            
+            logger.info(f"项目 {project_id} 所有文档生成完成，共生成 {len(documents)} 个文档")
+            return documents
+            
+        except Exception as e:
+            logger.error(f"生成所有文档失败: {str(e)}")
+            return []
+    
+    def _build_document_prompt(self, outline: BidOutline, analysis: RequirementAnalysis, 
+                             db: Session, project_id: int, user_id: str) -> str:
+        """构建文档内容生成提示词"""
+        # 获取相关上下文信息
+        context_info = self._get_context_info(outline, db, project_id, user_id)
+        
+        # 构建大纲项信息
+        outline_item = f"{outline.sequence} {outline.title}"
+        if outline.content:
+            outline_item += f"\n内容说明：{outline.content}"
+        if context_info:
+            outline_item += f"\n上下文信息：{context_info}"
+        
+        prompt_data = {
+            "outline_item": outline_item,
+            "project_overview": analysis.project_overview or "无项目概述信息",
+            "client_info": analysis.client_info or "无甲方信息",
+            "critical_requirements": analysis.critical_requirements or "无关键需求信息",
+            "important_requirements": analysis.important_requirements or "无重要需求信息"
+        }
+        
+        return get_bid_content_template(**prompt_data)
+    
+    def _get_context_info(self, outline: BidOutline, db: Session, project_id: int, user_id: str) -> str:
+        """获取大纲节点的上下文信息"""
+        context_parts = []
+        
+        # 获取父节点信息
+        if outline.parent_id:
+            parent = db.query(BidOutline).filter(
+                BidOutline.id == outline.parent_id,
+                BidOutline.project_id == project_id,
+                BidOutline.user_id == user_id
+            ).first()
+            if parent:
+                context_parts.append(f"父章节: {parent.sequence} {parent.title}")
+                if parent.content:
+                    context_parts.append(f"父章节描述: {parent.content}")
+        
+        # 获取同级节点信息
+        siblings = db.query(BidOutline).filter(
+            BidOutline.project_id == project_id,
+            BidOutline.user_id == user_id,
+            BidOutline.parent_id == outline.parent_id,
+            BidOutline.level == outline.level,
+            BidOutline.id != outline.id
+        ).order_by(BidOutline.order_index).all()
+        
+        if siblings:
+            sibling_titles = [f"{s.sequence} {s.title}" for s in siblings]
+            context_parts.append(f"同级章节: {', '.join(sibling_titles)}")
+        
+        # 获取子节点信息
+        children = db.query(BidOutline).filter(
+            BidOutline.parent_id == outline.id,
+            BidOutline.project_id == project_id,
+            BidOutline.user_id == user_id
+        ).order_by(BidOutline.order_index).all()
+        
+        if children:
+            child_titles = [f"{c.sequence} {c.title}" for c in children]
+            context_parts.append(f"子章节: {', '.join(child_titles)}")
+        
+        return "\n".join(context_parts) if context_parts else "无相关上下文信息"
+    
+    def _clean_document_content(self, content: str) -> str:
+        """清理和优化文档内容"""
+        if not content:
+            return ""
+        
+        # 移除多余的空行
+        lines = content.split('\n')
+        cleaned_lines = []
+        prev_empty = False
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                if not prev_empty:
+                    cleaned_lines.append('')
+                prev_empty = True
+            else:
+                cleaned_lines.append(line)
+                prev_empty = False
+        
+        # 移除开头和结尾的空行
+        while cleaned_lines and not cleaned_lines[0]:
+            cleaned_lines.pop(0)
+        while cleaned_lines and not cleaned_lines[-1]:
+            cleaned_lines.pop()
+        
+        return '\n'.join(cleaned_lines)
+    
+    def _check_content_quality(self, content: str, outline: BidOutline) -> float:
+        """检查内容质量并返回评分（0-100）"""
+        if not content:
+            return 0.0
+        
+        score = 0.0
+        
+        # 长度检查（20分）
+        content_length = len(content.strip())
+        if content_length >= 500:
+            score += 20
+        elif content_length >= 200:
+            score += 15
+        elif content_length >= 100:
+            score += 10
+        elif content_length >= 50:
+            score += 5
+        
+        # 结构检查（20分）
+        lines = content.split('\n')
+        non_empty_lines = [line for line in lines if line.strip()]
+        if len(non_empty_lines) >= 5:
+            score += 20
+        elif len(non_empty_lines) >= 3:
+            score += 15
+        elif len(non_empty_lines) >= 2:
+            score += 10
+        
+        # 关键词相关性检查（30分）
+        title_words = outline.title.lower().split()
+        content_lower = content.lower()
+        
+        relevant_words = 0
+        for word in title_words:
+            if len(word) > 1 and word in content_lower:
+                relevant_words += 1
+        
+        if title_words:
+            relevance_ratio = relevant_words / len(title_words)
+            score += relevance_ratio * 30
+        
+        # 专业术语检查（15分）
+        professional_terms = [
+            '技术', '方案', '实施', '管理', '质量', '服务', '系统', '架构',
+            '设计', '开发', '测试', '部署', '维护', '支持', '培训', '文档'
+        ]
+        
+        term_count = 0
+        for term in professional_terms:
+            if term in content:
+                term_count += 1
+        
+        score += min(term_count * 2, 15)
+        
+        # 格式检查（15分）
+        if '。' in content or '.' in content:
+            score += 5
+        if '：' in content or ':' in content:
+            score += 5
+        if any(char in content for char in ['、', '，', ',']):
+            score += 5
+        
+        return min(score, 100.0)
+    
+    def optimize_document_content(self, db: Session, document_id: int, user_id: str) -> bool:
+        """优化文档内容"""
+        try:
+            document = db.query(BidDocument).filter(
+                BidDocument.id == document_id,
+                BidDocument.user_id == user_id
+            ).first()
+            
+            if not document:
+                return False
+            
+            # 获取相关大纲和分析信息
+            outline = db.query(BidOutline).filter(
+                BidOutline.id == document.outline_id
+            ).first()
+            
+            if not outline:
+                return False
+            
+            analysis = db.query(RequirementAnalysis).filter(
+                RequirementAnalysis.project_id == document.project_id,
+                RequirementAnalysis.user_id == user_id
+            ).first()
+            
+            if not analysis:
+                return False
+            
+            # 构建优化提示词
+            optimize_prompt = f"""
+请优化以下标书章节内容，使其更加专业、完整和符合招标要求：
+
+章节标题：{outline.sequence} {outline.title}
+当前内容：
+{document.content}
+
+优化要求：
+1. 保持内容的专业性和准确性
+2. 确保内容与章节标题高度相关
+3. 增加必要的技术细节和实施方案
+4. 使用规范的商务文档语言
+5. 确保内容结构清晰、逻辑合理
+
+请返回优化后的内容：
+"""
+            
+            # 调用大模型优化内容
+            optimized_content = self.llm_client.generate_content(optimize_prompt, max_tokens=3000)
+            
+            if optimized_content and len(optimized_content.strip()) > len(document.content.strip()) * 0.5:
+                # 更新文档内容
+                document.content = self._clean_document_content(optimized_content)
+                document.version += 1
+                document.status = DocumentStatus.EDITED
+                
+                db.commit()
+                logger.info(f"文档 {document_id} 内容优化完成")
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"优化文档内容失败: {str(e)}")
+            db.rollback()
+            return False
+    
+    def generate_full_document(self, db: Session, project_id: int, user_id: str) -> str:
+        """生成完整的标书文档"""
+        try:
+            # 获取项目信息
+            project = db.query(Project).filter(
+                Project.id == project_id,
+                Project.user_id == user_id
+            ).first()
+            
+            if not project:
+                return ""
+            
+            # 获取所有大纲节点（按序号排序）
+            outlines = db.query(BidOutline).filter(
+                BidOutline.project_id == project_id,
+                BidOutline.user_id == user_id
+            ).order_by(BidOutline.level, BidOutline.order_index).all()
+            
+            if not outlines:
+                return ""
+            
+            # 获取所有文档内容
+            documents = db.query(BidDocument).filter(
+                BidDocument.project_id == project_id,
+                BidDocument.user_id == user_id
+            ).all()
+            
+            # 创建大纲ID到文档内容的映射
+            doc_map = {doc.outline_id: doc for doc in documents if doc.outline_id}
+            
+            # 构建完整文档
+            full_content = []
+            
+            # 添加文档标题
+            full_content.append(f"# {project.name}")
+            full_content.append("")
+            full_content.append("---")
+            full_content.append("")
+            
+            # 添加目录
+            full_content.append("## 目录")
+            full_content.append("")
+            for outline in outlines:
+                indent = "  " * (outline.level - 1)
+                full_content.append(f"{indent}- {outline.sequence} {outline.title}")
+            full_content.append("")
+            full_content.append("---")
+            full_content.append("")
+            
+            # 添加各章节内容
+            for outline in outlines:
+                # 添加章节标题
+                level_prefix = "#" * (outline.level + 1)
+                full_content.append(f"{level_prefix} {outline.sequence} {outline.title}")
+                full_content.append("")
+                
+                # 添加对应的文档内容
+                if outline.id in doc_map:
+                    document = doc_map[outline.id]
+                    full_content.append(document.content)
+                else:
+                    full_content.append("*此章节内容尚未生成*")
+                
+                full_content.append("")
+                full_content.append("---")
+                full_content.append("")
+            
+            return "\n".join(full_content)
+            
+        except Exception as e:
+            logger.error(f"生成完整文档失败: {str(e)}")
+            return ""

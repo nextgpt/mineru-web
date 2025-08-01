@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Query, HTTPException, Depends, BackgroundTasks
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from pydantic import BaseModel
@@ -6,10 +7,12 @@ from app.database import get_db
 from app.models.project import Project, ProjectStatus
 from app.models.requirement_analysis import RequirementAnalysis
 from app.models.bid_outline import BidOutline
+from app.models.bid_document import BidDocument, DocumentStatus
 from app.models.file import File as FileModel
 from app.models.parsed_content import ParsedContent
 from app.utils.user_dep import get_user_id
 from app.services.ai_analysis_service import AIAnalysisService
+from app.services.document_export_service import DocumentExportService, ExportFormat
 import logging
 
 logger = logging.getLogger(__name__)
@@ -58,6 +61,36 @@ class OutlineGenerateResponse(BaseModel):
     status: str
     message: str
     outline_count: Optional[int] = None
+
+# Document related Pydantic models
+class DocumentCreate(BaseModel):
+    title: str
+    content: str
+    outline_id: Optional[int] = None
+
+class DocumentUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    status: Optional[str] = None
+
+class DocumentResponse(BaseModel):
+    id: int
+    title: str
+    content: str
+    outline_id: Optional[int]
+    status: str
+    version: int
+    created_at: str
+    updated_at: Optional[str]
+
+class DocumentGenerateRequest(BaseModel):
+    outline_id: Optional[int] = None
+    regenerate: bool = False
+
+class DocumentGenerateResponse(BaseModel):
+    status: str
+    message: str
+    document_id: Optional[int] = None
 
 @router.get("/projects")
 def list_projects(
@@ -1209,3 +1242,581 @@ def perform_analysis_task(project_id: int, user_id: str, content: str):
     
     finally:
         db.close()
+# Docu
+ment management endpoints
+@router.get("/projects/{project_id}/documents")
+def get_project_documents(
+    project_id: int,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """获取项目的所有标书文档"""
+    # 验证项目存在
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == user_id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    
+    # 获取所有文档
+    documents = db.query(BidDocument).filter(
+        BidDocument.project_id == project_id,
+        BidDocument.user_id == user_id
+    ).order_by(BidDocument.created_at.desc()).all()
+    
+    return {
+        "status": "success",
+        "message": "获取文档列表成功",
+        "documents": [doc.to_dict() for doc in documents]
+    }
+
+@router.get("/projects/{project_id}/documents/{document_id}")
+def get_document(
+    project_id: int,
+    document_id: int,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """获取特定文档详情"""
+    # 验证项目和文档存在
+    document = db.query(BidDocument).filter(
+        BidDocument.id == document_id,
+        BidDocument.project_id == project_id,
+        BidDocument.user_id == user_id
+    ).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    
+    return {
+        "status": "success",
+        "message": "获取文档成功",
+        "document": document.to_dict()
+    }
+
+@router.post("/projects/{project_id}/documents")
+def create_document(
+    project_id: int,
+    document_data: DocumentCreate,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """创建新的标书文档"""
+    # 验证项目存在
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == user_id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    
+    # 验证大纲存在（如果指定了outline_id）
+    if document_data.outline_id:
+        outline = db.query(BidOutline).filter(
+            BidOutline.id == document_data.outline_id,
+            BidOutline.project_id == project_id,
+            BidOutline.user_id == user_id
+        ).first()
+        
+        if not outline:
+            raise HTTPException(status_code=400, detail="指定的大纲不存在")
+    
+    # 创建文档
+    document = BidDocument(
+        project_id=project_id,
+        user_id=user_id,
+        title=document_data.title,
+        content=document_data.content,
+        outline_id=document_data.outline_id,
+        status=DocumentStatus.DRAFT,
+        version=1
+    )
+    
+    db.add(document)
+    db.commit()
+    db.refresh(document)
+    
+    return {
+        "status": "success",
+        "message": "文档创建成功",
+        "document": document.to_dict()
+    }
+
+@router.put("/projects/{project_id}/documents/{document_id}")
+def update_document(
+    project_id: int,
+    document_id: int,
+    document_data: DocumentUpdate,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """更新标书文档"""
+    # 验证项目和文档存在
+    document = db.query(BidDocument).filter(
+        BidDocument.id == document_id,
+        BidDocument.project_id == project_id,
+        BidDocument.user_id == user_id
+    ).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    
+    # 更新字段
+    updated = False
+    if document_data.title is not None:
+        document.title = document_data.title
+        updated = True
+    
+    if document_data.content is not None:
+        document.content = document_data.content
+        updated = True
+        # 如果内容被修改，更新状态为已编辑
+        if document.status == DocumentStatus.GENERATED:
+            document.status = DocumentStatus.EDITED
+    
+    if document_data.status is not None:
+        try:
+            status_enum = DocumentStatus(document_data.status.lower())
+            document.status = status_enum
+            updated = True
+        except ValueError:
+            raise HTTPException(status_code=400, detail="无效的状态值")
+    
+    if updated:
+        # 增加版本号
+        document.version += 1
+        db.commit()
+        db.refresh(document)
+    
+    return {
+        "status": "success",
+        "message": "文档更新成功",
+        "document": document.to_dict()
+    }
+
+@router.delete("/projects/{project_id}/documents/{document_id}")
+def delete_document(
+    project_id: int,
+    document_id: int,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """删除标书文档"""
+    # 验证项目和文档存在
+    document = db.query(BidDocument).filter(
+        BidDocument.id == document_id,
+        BidDocument.project_id == project_id,
+        BidDocument.user_id == user_id
+    ).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    
+    try:
+        db.delete(document)
+        db.commit()
+        return {
+            "status": "success",
+            "message": "文档删除成功"
+        }
+    except Exception as e:
+        db.rollback()
+        logger.error(f"删除文档失败: {str(e)}")
+        raise HTTPException(status_code=500, detail="删除文档失败")
+
+@router.post("/projects/{project_id}/generate-document")
+def generate_document_content(
+    project_id: int,
+    generate_data: DocumentGenerateRequest,
+    background_tasks: BackgroundTasks,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """生成标书文档内容"""
+    # 验证项目存在
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == user_id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    
+    # 检查是否有大纲
+    outlines = db.query(BidOutline).filter(
+        BidOutline.project_id == project_id,
+        BidOutline.user_id == user_id
+    ).all()
+    
+    if not outlines:
+        raise HTTPException(status_code=400, detail="请先生成标书大纲")
+    
+    # 如果指定了特定大纲节点
+    if generate_data.outline_id:
+        outline = db.query(BidOutline).filter(
+            BidOutline.id == generate_data.outline_id,
+            BidOutline.project_id == project_id,
+            BidOutline.user_id == user_id
+        ).first()
+        
+        if not outline:
+            raise HTTPException(status_code=400, detail="指定的大纲不存在")
+        
+        # 检查是否已有对应文档
+        existing_doc = db.query(BidDocument).filter(
+            BidDocument.project_id == project_id,
+            BidDocument.user_id == user_id,
+            BidDocument.outline_id == generate_data.outline_id
+        ).first()
+        
+        if existing_doc and not generate_data.regenerate:
+            return DocumentGenerateResponse(
+                status="exists",
+                message="该大纲节点已有对应文档",
+                document_id=existing_doc.id
+            )
+    
+    # 更新项目状态
+    project.status = ProjectStatus.DOCUMENT_GENERATING
+    db.commit()
+    
+    # 启动后台文档生成任务
+    background_tasks.add_task(
+        generate_document_task,
+        project_id,
+        user_id,
+        generate_data.outline_id,
+        generate_data.regenerate
+    )
+    
+    return DocumentGenerateResponse(
+        status="started",
+        message="文档生成已开始，请稍后查看结果"
+    )
+
+@router.get("/projects/{project_id}/documents/full")
+def get_full_document(
+    project_id: int,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """获取完整的标书文档（合并所有章节）"""
+    # 验证项目存在
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == user_id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    
+    # 获取所有大纲节点（按序号排序）
+    outlines = db.query(BidOutline).filter(
+        BidOutline.project_id == project_id,
+        BidOutline.user_id == user_id
+    ).order_by(BidOutline.level, BidOutline.order_index).all()
+    
+    if not outlines:
+        return {
+            "status": "empty",
+            "message": "项目尚未生成大纲",
+            "content": ""
+        }
+    
+    # 获取所有文档内容
+    documents = db.query(BidDocument).filter(
+        BidDocument.project_id == project_id,
+        BidDocument.user_id == user_id
+    ).all()
+    
+    # 创建大纲ID到文档内容的映射
+    doc_map = {doc.outline_id: doc for doc in documents if doc.outline_id}
+    
+    # 构建完整文档
+    full_content = []
+    full_content.append(f"# {project.name}")
+    full_content.append("")
+    
+    for outline in outlines:
+        # 添加大纲标题
+        level_prefix = "#" * (outline.level + 1)
+        full_content.append(f"{level_prefix} {outline.sequence} {outline.title}")
+        full_content.append("")
+        
+        # 添加对应的文档内容
+        if outline.id in doc_map:
+            document = doc_map[outline.id]
+            full_content.append(document.content)
+        else:
+            full_content.append("*此章节内容尚未生成*")
+        
+        full_content.append("")
+        full_content.append("---")
+        full_content.append("")
+    
+    return {
+        "status": "success",
+        "message": "获取完整文档成功",
+        "content": "\n".join(full_content),
+        "outline_count": len(outlines),
+        "document_count": len(documents)
+    }
+
+def generate_document_task(project_id: int, user_id: str, outline_id: Optional[int] = None, regenerate: bool = False):
+    """生成文档内容的后台任务"""
+    from app.database import SessionLocal
+    from app.services.bid_generation_service import BidGenerationService
+    
+    db = SessionLocal()
+    try:
+        # 获取标书生成服务
+        bid_service = BidGenerationService()
+        
+        if outline_id:
+            # 生成特定大纲节点的文档
+            document = bid_service.generate_document_content(db, project_id, user_id, outline_id, regenerate)
+            if document:
+                logger.info(f"项目 {project_id} 大纲节点 {outline_id} 文档生成完成")
+            else:
+                logger.error(f"项目 {project_id} 大纲节点 {outline_id} 文档生成失败")
+        else:
+            # 生成所有大纲节点的文档
+            documents = bid_service.generate_all_documents(db, project_id, user_id, regenerate)
+            logger.info(f"项目 {project_id} 所有文档生成完成，共生成 {len(documents)} 个文档")
+        
+        # 更新项目状态
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if project:
+            project.status = ProjectStatus.COMPLETED
+            db.commit()
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"项目 {project_id} 文档生成失败: {str(e)}")
+        
+        # 更新项目状态为失败
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if project:
+            project.status = ProjectStatus.FAILED
+            db.commit()
+    
+    finally:
+        db.close()
+# Document 
+export endpoints
+@router.get("/projects/{project_id}/export")
+def export_project_document(
+    project_id: int,
+    format: str = Query("pdf", description="导出格式: pdf, docx, md, html, txt"),
+    include_outline: bool = Query(True, description="是否包含大纲"),
+    include_analysis: bool = Query(True, description="是否包含需求分析"),
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """导出项目完整文档"""
+    # 验证项目存在
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == user_id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    
+    # 验证导出格式
+    try:
+        export_format = ExportFormat(format.lower())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="不支持的导出格式")
+    
+    # 创建导出服务
+    export_service = DocumentExportService()
+    
+    # 导出文档
+    document_bytes = export_service.export_project_document(
+        db, project_id, user_id, export_format, include_outline, include_analysis
+    )
+    
+    if not document_bytes:
+        raise HTTPException(status_code=500, detail="文档导出失败")
+    
+    # 生成文件名
+    filename = export_service.get_export_filename(project.name, export_format)
+    
+    # 设置响应头
+    media_type_map = {
+        ExportFormat.PDF: "application/pdf",
+        ExportFormat.WORD: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ExportFormat.MARKDOWN: "text/markdown",
+        ExportFormat.HTML: "text/html",
+        ExportFormat.TXT: "text/plain"
+    }
+    
+    media_type = media_type_map.get(export_format, "application/octet-stream")
+    
+    return Response(
+        content=document_bytes,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{filename}",
+            "Content-Length": str(len(document_bytes))
+        }
+    )
+
+@router.get("/projects/{project_id}/documents/{document_id}/export")
+def export_single_document(
+    project_id: int,
+    document_id: int,
+    format: str = Query("pdf", description="导出格式: pdf, docx, md, html, txt"),
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """导出单个文档"""
+    # 验证项目和文档存在
+    document = db.query(BidDocument).filter(
+        BidDocument.id == document_id,
+        BidDocument.project_id == project_id,
+        BidDocument.user_id == user_id
+    ).first()
+    
+    if not document:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    
+    # 验证导出格式
+    try:
+        export_format = ExportFormat(format.lower())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="不支持的导出格式")
+    
+    # 创建导出服务
+    export_service = DocumentExportService()
+    
+    # 导出文档
+    document_bytes = export_service.export_single_document(
+        db, document_id, user_id, export_format
+    )
+    
+    if not document_bytes:
+        raise HTTPException(status_code=500, detail="文档导出失败")
+    
+    # 生成文件名
+    filename = export_service.get_export_filename(
+        document.title, export_format, is_single_doc=True, doc_title=document.title
+    )
+    
+    # 设置响应头
+    media_type_map = {
+        ExportFormat.PDF: "application/pdf",
+        ExportFormat.WORD: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ExportFormat.MARKDOWN: "text/markdown",
+        ExportFormat.HTML: "text/html",
+        ExportFormat.TXT: "text/plain"
+    }
+    
+    media_type = media_type_map.get(export_format, "application/octet-stream")
+    
+    return Response(
+        content=document_bytes,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{filename}",
+            "Content-Length": str(len(document_bytes))
+        }
+    )
+
+@router.get("/projects/{project_id}/export/formats")
+def get_supported_export_formats(
+    project_id: int,
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """获取支持的导出格式列表"""
+    # 验证项目存在
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == user_id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    
+    export_service = DocumentExportService()
+    supported_formats = export_service.get_supported_formats()
+    
+    format_descriptions = {
+        "pdf": "PDF文档 - 适合打印和正式提交",
+        "docx": "Word文档 - 可编辑的文档格式",
+        "md": "Markdown文档 - 轻量级标记语言",
+        "html": "HTML网页 - 可在浏览器中查看",
+        "txt": "纯文本文档 - 最基础的文本格式"
+    }
+    
+    return {
+        "status": "success",
+        "message": "获取支持格式成功",
+        "formats": [
+            {
+                "format": fmt,
+                "description": format_descriptions.get(fmt, ""),
+                "extension": fmt
+            }
+            for fmt in supported_formats
+        ]
+    }
+
+@router.get("/projects/{project_id}/export/preview")
+def preview_export_content(
+    project_id: int,
+    format: str = Query("html", description="预览格式: html, md, txt"),
+    include_outline: bool = Query(True, description="是否包含大纲"),
+    include_analysis: bool = Query(True, description="是否包含需求分析"),
+    user_id: str = Depends(get_user_id),
+    db: Session = Depends(get_db)
+):
+    """预览导出内容"""
+    # 验证项目存在
+    project = db.query(Project).filter(
+        Project.id == project_id,
+        Project.user_id == user_id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="项目不存在")
+    
+    # 验证预览格式
+    preview_formats = ["html", "md", "txt"]
+    if format.lower() not in preview_formats:
+        raise HTTPException(status_code=400, detail="不支持的预览格式")
+    
+    try:
+        export_format = ExportFormat(format.lower())
+    except ValueError:
+        raise HTTPException(status_code=400, detail="不支持的预览格式")
+    
+    # 创建导出服务
+    export_service = DocumentExportService()
+    
+    # 导出内容
+    content_bytes = export_service.export_project_document(
+        db, project_id, user_id, export_format, include_outline, include_analysis
+    )
+    
+    if not content_bytes:
+        raise HTTPException(status_code=500, detail="生成预览内容失败")
+    
+    # 返回预览内容
+    if format.lower() == "html":
+        return Response(
+            content=content_bytes,
+            media_type="text/html; charset=utf-8"
+        )
+    else:
+        return {
+            "status": "success",
+            "message": "预览内容生成成功",
+            "content": content_bytes.decode('utf-8'),
+            "format": format.lower()
+        }
