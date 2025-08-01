@@ -11,7 +11,6 @@ import os
 import io
 import json
 from pathlib import Path
-from app.services.parser import get_buckets
 
 router = APIRouter()
 
@@ -61,7 +60,7 @@ def parse_file(
         
         # 执行解析
         parser = ParserService(db)
-        result = parser.parse_file(file, user_id, predictor=request.app.state.predictor)
+        result = parser.parse_file(file, user_id)
         
         return {
             "msg": "解析完成",
@@ -122,10 +121,9 @@ def export_content(
         if not file:
             raise HTTPException(status_code=404, detail="文件不存在")
         
-        # 获取 MinIO bucket
-        buckets = get_buckets()
-        mds_bucket = buckets[0]  # markdown 文件存储的 bucket
-        print(mds_bucket)
+        # 使用默认的markdown bucket
+        mds_bucket = "mds"  # 默认markdown文件存储的bucket
+        print(f"Using bucket: {mds_bucket}")
         
         # 构建文件名
         file_name = Path(file.minio_path).stem
