@@ -18,6 +18,7 @@ def init_database():
         # 导入数据库模块
         from app.database import create_tables, engine
         from app.models import base, project, requirement_analysis, bid_outline, bid_document, file
+        from sqlalchemy import text
         
         print("🗄️ 正在创建数据库表...")
         
@@ -28,7 +29,7 @@ def init_database():
         
         # 测试连接
         with engine.connect() as conn:
-            result = conn.execute("SELECT 1")
+            result = conn.execute(text("SELECT 1"))
             print("✅ 数据库连接测试成功")
             
         return True
