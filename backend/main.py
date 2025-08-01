@@ -36,7 +36,12 @@ async def life_span(app: FastAPI):
     clean_memory()
 
 
-app = FastAPI(title="MinerU 文档解析系统 API", lifespan=life_span)
+app = FastAPI(
+    title="MinerU 文档解析系统 API", 
+    lifespan=life_span,
+    # 增加文件大小限制到100MB
+    max_request_size=100 * 1024 * 1024
+)
 
 # 允许前端跨域
 app.add_middleware(
