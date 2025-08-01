@@ -6,10 +6,6 @@
         <p class="page-subtitle">管理您的招标项目和生成的标书</p>
       </div>
       <div class="header-right">
-        <el-button @click="goToHome" class="home-button">
-          <el-icon><HomeFilled /></el-icon>
-          返回首页
-        </el-button>
         <el-button type="primary" @click="showCreateDialog = true">
           <el-icon><Upload /></el-icon>
           新建项目
@@ -175,7 +171,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { Upload, Document, Setting, HomeFilled } from '@element-plus/icons-vue'
+import { Upload, Document, Setting } from '@element-plus/icons-vue'
 import { projectsApi, type Project, type CreateProjectRequest } from '@/api/projects'
 
 const router = useRouter()
@@ -360,11 +356,6 @@ const handleCreateProject = async () => {
   }
 }
 
-// 返回首页
-const goToHome = () => {
-  router.push('/')
-}
-
 // 生命周期
 onMounted(() => {
   loadProjects()
@@ -373,19 +364,20 @@ onMounted(() => {
 
 <style scoped>
 .projects-page {
+  padding: 24px;
+  background: #f7f8fa;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 0;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 24px;
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .header-left {
@@ -393,15 +385,15 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: white;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
   margin: 0 0 8px 0;
 }
 
 .page-subtitle {
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  color: #6b7280;
   margin: 0;
 }
 
@@ -410,99 +402,22 @@ onMounted(() => {
   gap: 12px;
 }
 
-.header-right .el-button {
-  padding: 12px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 12px;
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
-  border: none;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-  transition: all 0.3s ease;
-}
-
-.header-right .el-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
-}
-
-.home-button {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1) !important;
-}
-
-.home-button:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2) !important;
-}
-
 .page-content {
-  margin: 40px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
 .search-bar {
-  padding: 24px 32px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.search-bar .el-input {
-  border-radius: 12px;
-}
-
-.search-bar .el-input :deep(.el-input__wrapper) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.search-bar .el-select {
-  border-radius: 12px;
-}
-
-.search-bar .el-select :deep(.el-input__wrapper) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .projects-table {
-  padding: 0 32px 32px 32px;
-}
-
-.projects-table :deep(.el-table) {
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.projects-table :deep(.el-table__header) {
-  background: linear-gradient(45deg, #f8faff, #f0f4ff);
-}
-
-.projects-table :deep(.el-table__header th) {
-  background: transparent;
-  border-bottom: 2px solid #e5e7eb;
-  font-weight: 600;
-  color: #374151;
-}
-
-.projects-table :deep(.el-table__body tr:hover) {
-  background: rgba(99, 102, 241, 0.05);
-}
-
-.projects-table :deep(.el-table__body td) {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 0 24px 24px 24px;
 }
 
 .project-name {
@@ -512,13 +427,12 @@ onMounted(() => {
 }
 
 .name-text {
-  font-weight: 600;
+  font-weight: 500;
   color: #1f2937;
-  font-size: 15px;
 }
 
 .description-text {
-  font-size: 13px;
+  font-size: 12px;
   color: #6b7280;
   line-height: 1.4;
 }
@@ -526,72 +440,25 @@ onMounted(() => {
 .file-info {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: rgba(99, 102, 241, 0.1);
-  border-radius: 8px;
-  color: #6366f1;
-  font-size: 13px;
-  font-weight: 500;
+  gap: 6px;
 }
 
 .file-name {
   font-size: 13px;
-  color: #6366f1;
+  color: #374151;
 }
 
 .no-file {
   color: #9ca3af;
   font-size: 13px;
-  font-style: italic;
-}
-
-.projects-table :deep(.el-button) {
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.projects-table :deep(.el-button--small) {
-  padding: 6px 12px;
-}
-
-.projects-table :deep(.el-button:hover) {
-  transform: translateY(-1px);
-}
-
-.projects-table :deep(.el-tag) {
-  border-radius: 8px;
-  font-weight: 500;
-  border: none;
 }
 
 .pagination-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.pagination-wrapper :deep(.el-pagination) {
-  background: transparent;
-}
-
-.pagination-wrapper :deep(.el-pager li) {
-  border-radius: 8px;
-  margin: 0 2px;
-  transition: all 0.3s ease;
-}
-
-.pagination-wrapper :deep(.el-pager li:hover) {
-  background: rgba(99, 102, 241, 0.1);
-  color: #6366f1;
-}
-
-.pagination-wrapper :deep(.el-pager li.is-active) {
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
-  color: white;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .dialog-footer {
@@ -602,23 +469,17 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .projects-page {
+    padding: 16px;
+  }
+  
   .page-header {
-    padding: 24px 20px;
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
   
-  .page-title {
-    font-size: 28px;
-  }
-  
-  .page-content {
-    margin: 20px;
-  }
-  
   .search-bar {
-    padding: 20px;
     flex-direction: column;
     gap: 12px;
     align-items: stretch;
@@ -628,32 +489,6 @@ onMounted(() => {
   .search-bar .el-select {
     width: 100% !important;
     margin-left: 0 !important;
-  }
-  
-  .projects-table {
-    padding: 0 20px 20px 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-header {
-    padding: 20px 16px;
-  }
-  
-  .page-title {
-    font-size: 24px;
-  }
-  
-  .page-content {
-    margin: 16px;
-  }
-  
-  .search-bar {
-    padding: 16px;
-  }
-  
-  .projects-table {
-    padding: 0 16px 16px 16px;
   }
 }
 </style>

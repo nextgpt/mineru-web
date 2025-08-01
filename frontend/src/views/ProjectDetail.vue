@@ -346,54 +346,40 @@ onMounted(() => {
 
 <style scoped>
 .project-detail-page {
+  background: #f7f8fa;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 24px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .header-left {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
 .back-button {
   align-self: flex-start;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  border-radius: 12px;
-  padding: 10px 20px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.back-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
 }
 
 .project-info {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .project-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: white;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
   margin: 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .project-meta {
@@ -402,20 +388,9 @@ onMounted(() => {
   gap: 16px;
 }
 
-.project-meta .el-tag {
-  border-radius: 8px;
-  font-weight: 500;
-  border: none;
-  backdrop-filter: blur(10px);
-}
-
 .create-time {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.1);
-  padding: 6px 12px;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
+  color: #6b7280;
 }
 
 .header-right {
@@ -423,57 +398,25 @@ onMounted(() => {
   gap: 12px;
 }
 
-.header-right .el-button {
-  border-radius: 12px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
-.header-right .el-button--primary {
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
-  border: none;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
-.header-right .el-button--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
-}
-
-.header-right .el-button:not(.el-button--primary) {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-.header-right .el-button:not(.el-button--primary):hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
 .page-content {
   flex: 1;
 }
 
 .content-container {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  margin: 40px;
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #fff;
+  margin: 0 24px 24px 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
 .project-tabs {
-  padding: 0 32px;
+  padding: 0 24px;
 }
 
 .project-tabs :deep(.el-tabs__header) {
   margin: 0;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
-  background: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .project-tabs :deep(.el-tabs__nav-wrap) {
@@ -481,72 +424,23 @@ onMounted(() => {
 }
 
 .project-tabs :deep(.el-tabs__item) {
-  padding: 0 24px;
-  height: 56px;
-  line-height: 56px;
-  font-size: 15px;
-  font-weight: 500;
-  color: #6b7280;
-  transition: all 0.3s ease;
-  border-radius: 12px 12px 0 0;
-  margin-right: 4px;
-}
-
-.project-tabs :deep(.el-tabs__item:hover) {
-  color: #6366f1;
-  background: rgba(99, 102, 241, 0.05);
-}
-
-.project-tabs :deep(.el-tabs__item.is-active) {
-  color: #6366f1;
-  background: rgba(99, 102, 241, 0.1);
-  font-weight: 600;
-}
-
-.project-tabs :deep(.el-tabs__active-bar) {
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
-  height: 3px;
-  border-radius: 2px;
+  padding: 0 20px;
+  height: 48px;
+  line-height: 48px;
+  font-size: 14px;
 }
 
 .tab-content {
-  padding: 32px;
-  min-height: 500px;
+  padding: 24px 0;
+  min-height: 400px;
 }
 
 .upload-content {
-  padding: 24px 0;
-}
-
-.upload-content :deep(.el-upload-dragger) {
-  border: 2px dashed #d1d5db;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.upload-content :deep(.el-upload-dragger:hover) {
-  border-color: #6366f1;
-  background: rgba(99, 102, 241, 0.05);
+  padding: 20px 0;
 }
 
 .upload-progress {
-  margin-top: 24px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.8);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-}
-
-.upload-progress :deep(.el-progress-bar__outer) {
-  border-radius: 8px;
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.upload-progress :deep(.el-progress-bar__inner) {
-  border-radius: 8px;
-  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+  margin-top: 20px;
 }
 
 .dialog-footer {
@@ -558,18 +452,17 @@ onMounted(() => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .page-header {
-    padding: 24px 20px;
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
   
   .header-left {
-    gap: 16px;
+    gap: 12px;
   }
   
   .project-title {
-    font-size: 28px;
+    font-size: 24px;
   }
   
   .project-meta {
@@ -579,36 +472,7 @@ onMounted(() => {
   }
   
   .content-container {
-    margin: 20px;
-  }
-  
-  .project-tabs {
-    padding: 0 20px;
-  }
-  
-  .project-tabs :deep(.el-tabs__item) {
-    padding: 0 16px;
-    height: 48px;
-    line-height: 48px;
-    font-size: 14px;
-  }
-  
-  .tab-content {
-    padding: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-header {
-    padding: 20px 16px;
-  }
-  
-  .project-title {
-    font-size: 24px;
-  }
-  
-  .content-container {
-    margin: 16px;
+    margin: 0 16px 16px 16px;
   }
   
   .project-tabs {
@@ -616,7 +480,7 @@ onMounted(() => {
   }
   
   .tab-content {
-    padding: 16px;
+    padding: 16px 0;
   }
 }
 </style>

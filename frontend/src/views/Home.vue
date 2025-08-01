@@ -300,7 +300,7 @@ const handleDialogClose = (done: () => void) => {
 <style scoped>
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f7f8fa;
   position: relative;
   overflow: hidden;
 }
@@ -310,9 +310,8 @@ const handleDialogClose = (done: () => void) => {
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .nav-left .logo {
@@ -324,7 +323,7 @@ const handleDialogClose = (done: () => void) => {
 .logo-text {
   font-size: 18px;
   font-weight: 600;
-  color: white;
+  color: #1f2937;
 }
 
 .nav-right {
@@ -333,14 +332,14 @@ const handleDialogClose = (done: () => void) => {
 }
 
 .nav-right .el-button {
-  color: white;
-  border: none;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  background: #fff;
 }
 
 .nav-right .el-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #f9fafb;
+  color: #374151;
 }
 
 .main-content {
