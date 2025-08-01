@@ -22,8 +22,13 @@ services:
               capabilities: [gpu]
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
-      - DATABASE_URL=sqlite:///./mineru.db
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/bidgen
+      - MINERU_API_URL=http://192.168.30.54:8088
+      - LLM_API_URL=http://192.168.30.54:3000/v1
+      - LLM_API_KEY=token-abc123
+      - LLM_MODEL_NAME=Qwen3-30B-A3B-FP8
       # 按需配置
       - BACKEND=sglang-client  # 只能用client，uvicorn无法在子进程加载vlm模型
       # - MODEL_PATH=/models/vlm
@@ -36,6 +41,8 @@ services:
       redis:
         condition: service_healthy
       minio:
+        condition: service_healthy
+      postgres:
         condition: service_healthy
       mineru-sglang:
         condition: service_healthy
@@ -54,8 +61,13 @@ services:
     command: python run_worker.py
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio:9000}
-      - DATABASE_URL=sqlite:///./mineru.db
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/bidgen
+      - MINERU_API_URL=http://192.168.30.54:8088
+      - LLM_API_URL=http://192.168.30.54:3000/v1
+      - LLM_API_KEY=token-abc123
+      - LLM_MODEL_NAME=Qwen3-30B-A3B-FP8
       # 按需配置
       - SERVER_URL=http://mineru-sglang:30000  # sglang server服务地址
 
@@ -68,6 +80,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
       mineru-sglang:
         condition: service_healthy
     networks:
@@ -78,7 +92,7 @@ services:
   redis:
     image: redis:latest
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -93,8 +107,8 @@ services:
   minio:
     image: quay.io/minio/minio:latest
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "19000:9000"
+      - "19001:9001"
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
@@ -109,9 +123,28 @@ services:
     networks:
       - mineru-network
 
+  postgres:
+    image: postgres:17
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_DB: bidgen
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mineru-network
+
 volumes:
   minio_data:
   redis_data:
+  postgres_data:
 
 networks:
   mineru-network:

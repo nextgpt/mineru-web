@@ -3,3 +3,8 @@ alembic==1.16.1
 minio==7.2.15
 SQLAlchemy==2.0.41
 redis
+psycopg2-binary==2.9.9
+aiohttp==3.9.1
+aioredis==2.0.1
+tenacity==8.2.3
+loguru==0.7.2

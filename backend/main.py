@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from app.api import upload_router, files_router, parsed_router, settings_router
 from app.api import task, stats
+from app.api.health import router as health_router
+from app.api.projects import router as projects_router
 from contextlib import asynccontextmanager
 from mineru.cli.fast_api import parse_pdf
 
@@ -57,6 +59,8 @@ app.include_router(parsed_router, prefix="/api", tags=["parsed"])
 app.include_router(settings_router, prefix="/api", tags=["settings"])
 app.include_router(task.router, prefix="/api", tags=["task"])
 app.include_router(stats.router, prefix="/api", tags=["stats"])
+app.include_router(health_router, prefix="/api", tags=["health"])
+app.include_router(projects_router, prefix="/api", tags=["projects"])
 
 @app.get("/ping")
 def ping():

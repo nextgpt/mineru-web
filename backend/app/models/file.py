@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.models.base import Base
 from datetime import datetime
@@ -29,6 +30,9 @@ class File(Base):
     backend = Column(Enum(BackendType), default=BackendType.PIPELINE)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # 关系
+    projects = relationship("Project", back_populates="original_file")
 
     def to_dict(self):
         return {
