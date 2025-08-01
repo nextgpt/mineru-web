@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException, Depends, BackgroundTasks
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from app.database import get_db
 from app.models.project import Project, ProjectStatus
