@@ -1,6 +1,7 @@
 """
 文档解析服务
 使用已部署的MinerU API服务进行文档解析
+基于官方demo优化
 """
 import os
 from typing import List, Dict, Any, Union, Tuple
@@ -57,8 +58,8 @@ class MemoryDataWriter:
 def get_s3_image_url(image_path: str, bucket: str) -> str:
     """Get HTTP accessible image URL from S3"""
     # 这里需要根据您的MinIO配置来构建URL
-    # 假设MinIO服务运行在192.168.30.54:9000
-    endpoint = "http://192.168.30.54:9000"
+    # 假设MinIO服务运行在192.168.30.220:19000
+    endpoint = "http://192.168.30.220:19000"
     return f"{endpoint}/{bucket}/{image_path}"
 
 
@@ -103,6 +104,9 @@ class ParserService:
             if settings.get('force_ocr', False):
                 parse_method = 'ocr'
             
+            # 获取解析后端配置
+            backend = settings.get("backend", "pipeline")
+            
             # 更新文件状态为解析中
             file.status = FileStatus.PARSING
             self.db.commit()
@@ -119,6 +123,7 @@ class ParserService:
 
             # 使用MinerU API解析文档
             logger.info(f"Starting document parsing for file: {file_name}")
+            logger.info(f"Using backend: {backend}, method: {parse_method}")
             
             parse_result = self.mineru_client.parse_document_sync(
                 file_path=file_name,
@@ -126,7 +131,10 @@ class ParserService:
                 parse_method=parse_method,
                 lang=settings.get('ocr_lang', 'ch'),
                 formula_enable=settings.get('formula_recognition', True),
-                table_enable=settings.get('table_recognition', True)
+                table_enable=settings.get('table_recognition', True),
+                backend=backend,
+                start_page_id=0,
+                end_page_id=None
             )
             
             logger.info("Document parsing completed successfully")
@@ -136,6 +144,8 @@ class ParserService:
                 markdown_content = parse_result['content']
             elif 'markdown' in parse_result:
                 markdown_content = parse_result['markdown']
+            elif 'result' in parse_result and 'content' in parse_result['result']:
+                markdown_content = parse_result['result']['content']
             else:
                 # 如果没有找到标准字段，尝试其他可能的字段
                 markdown_content = str(parse_result)
@@ -155,7 +165,9 @@ class ParserService:
             return {
                 "status": "success",
                 "content": markdown_content,
-                "file_id": file.id
+                "file_id": file.id,
+                "backend": backend,
+                "method": parse_method
             }
 
         except Exception as e:
@@ -234,6 +246,9 @@ class ParserService:
             if settings.get('force_ocr', False):
                 parse_method = 'ocr'
             
+            # 获取解析后端配置
+            backend = settings.get("backend", "pipeline")
+            
             # 更新文件状态为解析中
             file.status = FileStatus.PARSING
             self.db.commit()
@@ -251,7 +266,10 @@ class ParserService:
                     parse_method=parse_method,
                     lang=settings.get('ocr_lang', 'ch'),
                     formula_enable=settings.get('formula_recognition', True),
-                    table_enable=settings.get('table_recognition', True)
+                    table_enable=settings.get('table_recognition', True),
+                    backend=backend,
+                    start_page_id=0,
+                    end_page_id=None
                 )
             
             # 提取解析结果
@@ -259,6 +277,8 @@ class ParserService:
                 markdown_content = parse_result['content']
             elif 'markdown' in parse_result:
                 markdown_content = parse_result['markdown']
+            elif 'result' in parse_result and 'content' in parse_result['result']:
+                markdown_content = parse_result['result']['content']
             else:
                 markdown_content = str(parse_result)
             
@@ -277,7 +297,9 @@ class ParserService:
             return {
                 "status": "success",
                 "content": markdown_content,
-                "file_id": file.id
+                "file_id": file.id,
+                "backend": backend,
+                "method": parse_method
             }
 
         except Exception as e:

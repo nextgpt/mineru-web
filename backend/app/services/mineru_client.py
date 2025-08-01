@@ -1,11 +1,12 @@
 """
 MinerU文档解析服务客户端
 提供文档上传、解析状态查询、结果获取功能
+基于官方demo优化
 """
 import asyncio
 import aiohttp
 import json
-from typing import Dict, Any, Optional, Union
+from typing import Dict, Any, Optional, Union, List
 from pathlib import Path
 from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -64,7 +65,10 @@ class MinerUClient:
         parse_method: str = "auto",
         lang: str = "ch",
         formula_enable: bool = True,
-        table_enable: bool = True
+        table_enable: bool = True,
+        backend: str = "pipeline",
+        start_page_id: int = 0,
+        end_page_id: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         上传文档进行解析
@@ -72,10 +76,13 @@ class MinerUClient:
         Args:
             file_path: 文件路径或文件名
             file_bytes: 文件字节内容（如果提供则使用此内容）
-            parse_method: 解析方法 (auto, ocr, txt)
-            lang: 语言设置 (ch, en)
+            parse_method: 解析方法 (auto, ocr, txt, vlm)
+            lang: 语言设置 (ch, en, chinese_cht, korean, japan, ta, te, ka)
             formula_enable: 是否启用公式识别
             table_enable: 是否启用表格识别
+            backend: 解析后端 (pipeline, vlm-transformers, vlm-sglang-engine, vlm-sglang-client)
+            start_page_id: 开始页码
+            end_page_id: 结束页码
             
         Returns:
             Dict包含task_id和状态信息
@@ -100,10 +107,15 @@ class MinerUClient:
             data.add_field('lang', lang)
             data.add_field('formula_enable', str(formula_enable).lower())
             data.add_field('table_enable', str(table_enable).lower())
+            data.add_field('backend', backend)
+            data.add_field('start_page_id', str(start_page_id))
+            if end_page_id is not None:
+                data.add_field('end_page_id', str(end_page_id))
             
             # 发送请求
             url = f"{self.api_url}/api/v1/documents/parse"
             logger.info(f"Uploading document to MinerU: {url}")
+            logger.info(f"Parameters: method={parse_method}, lang={lang}, backend={backend}")
             
             async with session.post(url, data=data) as response:
                 if response.status != 200:
@@ -209,6 +221,9 @@ class MinerUClient:
         lang: str = "ch",
         formula_enable: bool = True,
         table_enable: bool = True,
+        backend: str = "pipeline",
+        start_page_id: int = 0,
+        end_page_id: Optional[int] = None,
         poll_interval: int = 5,
         max_wait_time: int = 600
     ) -> Dict[str, Any]:
@@ -222,6 +237,9 @@ class MinerUClient:
             lang: 语言设置
             formula_enable: 是否启用公式识别
             table_enable: 是否启用表格识别
+            backend: 解析后端
+            start_page_id: 开始页码
+            end_page_id: 结束页码
             poll_interval: 轮询间隔（秒）
             max_wait_time: 最大等待时间（秒）
             
@@ -233,7 +251,8 @@ class MinerUClient:
         """
         # 上传文档
         upload_result = await self.upload_document(
-            file_path, file_bytes, parse_method, lang, formula_enable, table_enable
+            file_path, file_bytes, parse_method, lang, 
+            formula_enable, table_enable, backend, start_page_id, end_page_id
         )
         
         task_id = upload_result.get('task_id')
@@ -275,6 +294,9 @@ class MinerUClient:
         lang: str = "ch",
         formula_enable: bool = True,
         table_enable: bool = True,
+        backend: str = "pipeline",
+        start_page_id: int = 0,
+        end_page_id: Optional[int] = None,
         poll_interval: int = 5,
         max_wait_time: int = 600
     ) -> Dict[str, Any]:
@@ -288,6 +310,9 @@ class MinerUClient:
             lang: 语言设置
             formula_enable: 是否启用公式识别
             table_enable: 是否启用表格识别
+            backend: 解析后端
+            start_page_id: 开始页码
+            end_page_id: 结束页码
             poll_interval: 轮询间隔（秒）
             max_wait_time: 最大等待时间（秒）
             
@@ -301,7 +326,8 @@ class MinerUClient:
             async with self:
                 return await self.parse_document_async(
                     file_path, file_bytes, parse_method, lang,
-                    formula_enable, table_enable, poll_interval, max_wait_time
+                    formula_enable, table_enable, backend, 
+                    start_page_id, end_page_id, poll_interval, max_wait_time
                 )
         
         # 运行异步函数
