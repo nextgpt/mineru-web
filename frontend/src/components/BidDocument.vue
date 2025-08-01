@@ -56,6 +56,9 @@
         </div>
         <div class="toolbar-right">
           <span class="word-count">字数: {{ wordCount }}</span>
+          <el-button size="small" @click="printPreview" v-if="viewMode === 'preview'">
+            打印预览
+          </el-button>
           <el-button size="small" @click="saveDocument" :loading="saving">
             保存
           </el-button>
@@ -64,7 +67,26 @@
 
       <!-- 编辑模式 -->
       <div v-if="viewMode === 'edit'" class="document-editor">
+        <div class="editor-toolbar">
+          <el-button-group size="small">
+            <el-button @click="insertText('**', '**')" title="粗体">
+              <strong>B</strong>
+            </el-button>
+            <el-button @click="insertText('*', '*')" title="斜体">
+              <em>I</em>
+            </el-button>
+            <el-button @click="insertText('# ', '')" title="标题">H1</el-button>
+            <el-button @click="insertText('## ', '')" title="二级标题">H2</el-button>
+            <el-button @click="insertText('### ', '')" title="三级标题">H3</el-button>
+          </el-button-group>
+          <el-button-group size="small" style="margin-left: 12px;">
+            <el-button @click="insertText('- ', '')" title="无序列表">列表</el-button>
+            <el-button @click="insertText('1. ', '')" title="有序列表">编号</el-button>
+            <el-button @click="insertText('> ', '')" title="引用">引用</el-button>
+          </el-button-group>
+        </div>
         <el-input
+          ref="editorTextarea"
           v-model="documentContent"
           type="textarea"
           :rows="25"
@@ -91,22 +113,57 @@
     <el-dialog
       v-model="showExportDialog"
       title="导出标书文档"
-      width="400px"
+      width="500px"
     >
       <div class="export-options">
-        <h4>选择导出格式：</h4>
-        <el-radio-group v-model="exportFormat">
-          <el-radio label="pdf">PDF 格式</el-radio>
-          <el-radio label="docx">Word 格式</el-radio>
-          <el-radio label="md">Markdown 格式</el-radio>
-        </el-radio-group>
+        <div class="export-section">
+          <h4>选择导出格式：</h4>
+          <el-radio-group v-model="exportFormat" class="format-options">
+            <el-radio label="pdf" class="format-option">
+              <div class="format-info">
+                <strong>PDF 格式</strong>
+                <span>适合打印和正式提交</span>
+              </div>
+            </el-radio>
+            <el-radio label="docx" class="format-option">
+              <div class="format-info">
+                <strong>Word 格式</strong>
+                <span>可进一步编辑和修改</span>
+              </div>
+            </el-radio>
+            <el-radio label="md" class="format-option">
+              <div class="format-info">
+                <strong>Markdown 格式</strong>
+                <span>纯文本格式，便于版本控制</span>
+              </div>
+            </el-radio>
+          </el-radio-group>
+        </div>
+        
+        <div class="export-section">
+          <h4>导出选项：</h4>
+          <el-checkbox v-model="exportOptions.includeOutline">包含大纲目录</el-checkbox>
+          <el-checkbox v-model="exportOptions.includePageNumbers">包含页码</el-checkbox>
+          <el-checkbox v-model="exportOptions.includeWatermark">添加水印</el-checkbox>
+        </div>
+        
+        <div class="export-section" v-if="exportOptions.includeWatermark">
+          <el-form-item label="水印文字：">
+            <el-input 
+              v-model="exportOptions.watermarkText" 
+              placeholder="请输入水印文字"
+              maxlength="50"
+            />
+          </el-form-item>
+        </div>
       </div>
       
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="showExportDialog = false">取消</el-button>
           <el-button type="primary" @click="handleExport" :loading="exporting">
-            导出
+            <el-icon><Download /></el-icon>
+            导出文档
           </el-button>
         </span>
       </template>
@@ -115,30 +172,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Loading, Document, Upload } from '@element-plus/icons-vue'
+import { Loading, Document, Upload, Download } from '@element-plus/icons-vue'
+import { documentApi, type BidDocument } from '@/api/projects'
 
 interface Props {
   projectId: number
-}
-
-interface BidDocument {
-  id: number
-  project_id: number
-  user_id: string
-  title: string
-  content: string
-  outline_id?: number
-  status: 'draft' | 'generated' | 'edited' | 'finalized'
-  version: number
-  created_at: string
-  updated_at: string
+  selectedOutlineId?: number
 }
 
 const props = defineProps<Props>()
 
 const document = ref<BidDocument | null>(null)
+const documents = ref<BidDocument[]>([])
 const generating = ref(false)
 const saving = ref(false)
 const exporting = ref(false)
@@ -149,6 +196,15 @@ const progressStatus = ref<'success' | 'exception' | undefined>()
 const progressText = ref('')
 const showExportDialog = ref(false)
 const exportFormat = ref('pdf')
+const autoSaveTimer = ref<NodeJS.Timeout | null>(null)
+const editorTextarea = ref<any>(null)
+
+const exportOptions = ref({
+  includeOutline: true,
+  includePageNumbers: true,
+  includeWatermark: false,
+  watermarkText: '内部文档'
+})
 
 // 计算属性
 const wordCount = computed(() => {
@@ -156,11 +212,37 @@ const wordCount = computed(() => {
 })
 
 const formattedContent = computed(() => {
-  // 简单的 Markdown 到 HTML 转换
-  return documentContent.value
-    .replace(/\n/g, '<br>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+  // 增强的 Markdown 到 HTML 转换
+  let html = documentContent.value
+  
+  // 标题转换
+  html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>')
+  html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>')
+  html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>')
+  
+  // 粗体和斜体
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>')
+  
+  // 列表
+  html = html.replace(/^- (.*$)/gm, '<li>$1</li>')
+  html = html.replace(/^(\d+)\. (.*$)/gm, '<li>$2</li>')
+  
+  // 引用
+  html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+  
+  // 换行
+  html = html.replace(/\n/g, '<br>')
+  
+  // 包装列表项
+  html = html.replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>')
+  html = html.replace(/<\/ul><br><ul>/g, '')
+  
+  // 包装引用
+  html = html.replace(/(<blockquote>.*?<\/blockquote>)/gs, '<div class="quote-block">$1</div>')
+  html = html.replace(/<\/div><br><div class="quote-block">/g, '<br>')
+  
+  return html
 })
 
 const generateFullDocument = async () => {
@@ -169,207 +251,109 @@ const generateFullDocument = async () => {
     generateProgress.value = 0
     progressText.value = '正在初始化生成任务...'
     
-    // 模拟生成进度
-    const progressSteps = [
-      { progress: 20, text: '正在分析大纲结构...' },
-      { progress: 40, text: '正在生成项目概述...' },
-      { progress: 60, text: '正在生成技术方案...' },
-      { progress: 80, text: '正在生成实施计划...' },
-      { progress: 100, text: '标书生成完成！' }
-    ]
+    const response = await documentApi.generateDocument(props.projectId, {
+      outline_id: props.selectedOutlineId,
+      regenerate: false
+    })
     
-    for (const step of progressSteps) {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      generateProgress.value = step.progress
-      progressText.value = step.text
-    }
-    
-    // TODO: 调用后端API生成文档
-    // document.value = await documentApi.generateDocument(props.projectId)
-    
-    // 模拟生成的文档内容
-    documentContent.value = `# 智能办公系统建设项目技术方案
-
-## 1. 项目概述
-
-### 1.1 项目背景
-
-随着信息技术的快速发展和数字化转型的深入推进，传统的办公模式已经无法满足现代企业高效、协同、智能化的办公需求。本项目旨在构建一套完整的智能办公系统，通过先进的技术手段提升办公效率，优化工作流程，实现办公环境的数字化升级。
-
-### 1.2 项目目标
-
-本项目的主要目标包括：
-- 建设统一的智能办公平台，整合各类办公应用
-- 实现办公流程的数字化和自动化
-- 提供便捷的移动办公解决方案
-- 建立完善的数据安全保障体系
-- 提升整体办公效率30%以上
-
-## 2. 技术方案
-
-### 2.1 系统架构设计
-
-本系统采用微服务架构设计，具备高可用、高并发、易扩展的特点。整体架构分为以下几个层次：
-
-**前端展示层**
-- Web端：基于Vue.js 3.0框架开发
-- 移动端：采用React Native跨平台开发
-- 桌面端：使用Electron技术栈
-
-**API网关层**
-- 统一的API入口管理
-- 请求路由和负载均衡
-- 安全认证和权限控制
-
-**业务服务层**
-- 用户管理服务
-- 文档管理服务
-- 流程审批服务
-- 即时通讯服务
-- 视频会议服务
-
-**数据存储层**
-- 关系型数据库：PostgreSQL
-- 缓存数据库：Redis
-- 文件存储：MinIO对象存储
-- 搜索引擎：Elasticsearch
-
-### 2.2 核心功能模块
-
-**文档管理模块**
-- 支持多种文档格式的在线预览和编辑
-- 版本控制和协同编辑功能
-- 智能分类和全文检索
-- 文档安全权限管理
-
-**流程审批模块**
-- 可视化流程设计器
-- 灵活的审批规则配置
-- 移动端审批支持
-- 审批过程全程跟踪
-
-**即时通讯模块**
-- 实时消息推送
-- 群组聊天和文件共享
-- 消息加密传输
-- 离线消息存储
-
-**视频会议模块**
-- 高清音视频通话
-- 屏幕共享和白板功能
-- 会议录制和回放
-- 多终端同步接入
-
-## 3. 技术特色
-
-### 3.1 人工智能集成
-
-系统集成了多项AI技术，包括：
-- 智能文档分析和摘要生成
-- 语音转文字和智能会议纪要
-- 智能日程安排和提醒
-- 基于机器学习的个性化推荐
-
-### 3.2 安全保障
-
-采用多层次的安全防护措施：
-- 数据传输加密（TLS 1.3）
-- 数据存储加密（AES-256）
-- 多因子身份认证
-- 细粒度权限控制
-- 安全审计日志
-
-### 3.3 性能优化
-
-通过多种技术手段保障系统性能：
-- 分布式缓存策略
-- 数据库读写分离
-- CDN内容分发
-- 异步任务处理
-- 智能负载均衡
-
-## 4. 实施计划
-
-### 4.1 项目阶段划分
-
-**第一阶段（1-2个月）：基础平台建设**
-- 系统架构搭建
-- 基础服务开发
-- 数据库设计和部署
-
-**第二阶段（3-4个月）：核心功能开发**
-- 文档管理模块开发
-- 流程审批模块开发
-- 用户权限系统开发
-
-**第三阶段（5-6个月）：高级功能开发**
-- 即时通讯模块开发
-- 视频会议模块开发
-- AI功能集成
-
-**第四阶段（7-8个月）：系统集成和测试**
-- 系统集成测试
-- 性能优化调试
-- 安全测试验证
-
-**第五阶段（9个月）：部署上线**
-- 生产环境部署
-- 用户培训和支持
-- 系统稳定性监控
-
-### 4.2 质量保证
-
-- 建立完善的代码审查机制
-- 实施自动化测试流程
-- 定期进行安全漏洞扫描
-- 建立持续集成和部署流程
-
-## 5. 预期效果
-
-通过本项目的实施，预期将达到以下效果：
-
-- **效率提升**：整体办公效率提升30%以上
-- **成本节约**：减少纸质文档使用，降低办公成本20%
-- **协同增强**：跨部门协作效率提升50%
-- **安全保障**：建立企业级安全防护体系
-- **用户体验**：提供统一、便捷的办公体验
-
-## 6. 总结
-
-本技术方案基于先进的技术架构和丰富的行业经验，能够为客户提供一套完整、高效、安全的智能办公解决方案。我们承诺严格按照项目计划执行，确保项目按时、按质完成，为客户创造最大价值。`
-
-    document.value = {
-      id: 1,
-      project_id: props.projectId,
-      user_id: 'user123',
-      title: '智能办公系统建设项目技术方案',
-      content: documentContent.value,
-      status: 'generated',
-      version: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+    if (response.status === 'started') {
+      // 模拟生成进度
+      const progressSteps = [
+        { progress: 20, text: '正在分析大纲结构...' },
+        { progress: 40, text: '正在生成项目概述...' },
+        { progress: 60, text: '正在生成技术方案...' },
+        { progress: 80, text: '正在生成实施计划...' },
+        { progress: 100, text: '标书生成完成！' }
+      ]
+      
+      for (const step of progressSteps) {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        generateProgress.value = step.progress
+        progressText.value = step.text
+      }
+      
+      // 轮询检查生成状态
+      await pollDocumentGeneration()
+    } else if (response.status === 'exists') {
+      ElMessage.info('文档已存在，正在加载...')
+      await loadDocuments()
     }
     
     generating.value = false
     ElMessage.success('标书生成完成')
-  } catch (error) {
+  } catch (error: any) {
     console.error('生成标书失败:', error)
-    ElMessage.error('生成标书失败')
+    ElMessage.error(error.response?.data?.detail || '生成标书失败')
     generating.value = false
     progressStatus.value = 'exception'
   }
 }
 
-const loadDocument = async () => {
+const pollDocumentGeneration = async () => {
+  const maxAttempts = 30 // 最多轮询30次
+  let attempts = 0
+  
+  const poll = async () => {
+    try {
+      attempts++
+      await loadDocuments()
+      
+      if (documents.value.length > 0) {
+        // 选择最新的文档
+        const latestDoc = documents.value.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]
+        
+        document.value = latestDoc
+        documentContent.value = latestDoc.content
+        return
+      }
+      
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 10000) // 每10秒轮询一次
+      } else {
+        ElMessage.warning('文档生成时间较长，请稍后手动刷新查看')
+      }
+    } catch (error) {
+      console.error('轮询文档状态失败:', error)
+    }
+  }
+  
+  setTimeout(poll, 10000) // 10秒后开始第一次轮询
+}
+
+const loadDocuments = async () => {
   try {
-    // TODO: 调用后端API获取文档
-    // const doc = await documentApi.getDocument(props.projectId)
-    // if (doc) {
-    //   document.value = doc
-    //   documentContent.value = doc.content
-    // }
-  } catch (error) {
+    const response = await documentApi.getDocuments(props.projectId)
+    
+    if (response.status === 'success' && response.documents) {
+      documents.value = response.documents
+      
+      // 如果有指定的大纲ID，优先选择对应的文档
+      if (props.selectedOutlineId) {
+        const targetDoc = documents.value.find(doc => doc.outline_id === props.selectedOutlineId)
+        if (targetDoc) {
+          document.value = targetDoc
+          documentContent.value = targetDoc.content
+          return
+        }
+      }
+      
+      // 否则选择最新的文档
+      if (documents.value.length > 0) {
+        const latestDoc = documents.value.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0]
+        
+        document.value = latestDoc
+        documentContent.value = latestDoc.content
+      }
+    }
+  } catch (error: any) {
     console.error('加载文档失败:', error)
+    if (error.response?.status !== 404) {
+      ElMessage.error('加载文档失败')
+    }
   }
 }
 
@@ -378,26 +362,38 @@ const handleContentChange = () => {
   if (document.value && document.value.status === 'generated') {
     document.value.status = 'edited'
   }
+  
+  // 设置自动保存
+  if (autoSaveTimer.value) {
+    clearTimeout(autoSaveTimer.value)
+  }
+  
+  autoSaveTimer.value = setTimeout(() => {
+    saveDocument(true) // 自动保存
+  }, 3000) // 3秒后自动保存
 }
 
-const saveDocument = async () => {
+const saveDocument = async (isAutoSave = false) => {
   if (!document.value) return
   
   try {
     saving.value = true
     
-    // TODO: 调用后端API保存文档
-    // await documentApi.updateDocument(document.value.id, {
-    //   content: documentContent.value
-    // })
+    const updatedDoc = await documentApi.updateDocument(props.projectId, document.value.id, {
+      content: documentContent.value,
+      status: document.value.status
+    })
     
-    document.value.content = documentContent.value
-    document.value.updated_at = new Date().toISOString()
+    document.value = updatedDoc
     
-    ElMessage.success('文档保存成功')
-  } catch (error) {
+    if (!isAutoSave) {
+      ElMessage.success('文档保存成功')
+    }
+  } catch (error: any) {
     console.error('保存文档失败:', error)
-    ElMessage.error('保存文档失败')
+    if (!isAutoSave) {
+      ElMessage.error(error.response?.data?.detail || '保存文档失败')
+    }
   } finally {
     saving.value = false
   }
@@ -411,30 +407,209 @@ const handleExport = async () => {
   try {
     exporting.value = true
     
-    // TODO: 调用后端API导出文档
-    // const blob = await documentApi.exportDocument(props.projectId, exportFormat.value)
-    // const url = window.URL.createObjectURL(blob)
-    // const a = document.createElement('a')
-    // a.href = url
-    // a.download = `标书文档.${exportFormat.value}`
-    // a.click()
-    // window.URL.revokeObjectURL(url)
+    // 构建导出参数
+    const exportParams = new URLSearchParams({
+      format: exportFormat.value,
+      include_outline: exportOptions.value.includeOutline.toString(),
+      include_page_numbers: exportOptions.value.includePageNumbers.toString(),
+      include_watermark: exportOptions.value.includeWatermark.toString(),
+    })
     
-    // 模拟导出
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    if (exportOptions.value.includeWatermark && exportOptions.value.watermarkText) {
+      exportParams.append('watermark_text', exportOptions.value.watermarkText)
+    }
+    
+    // 调用导出API
+    const response = await fetch(`/api/projects/${props.projectId}/export?${exportParams.toString()}`, {
+      method: 'GET',
+      headers: {
+        'X-User-Id': localStorage.getItem('userId') || 'anonymous'
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error('导出失败')
+    }
+    
+    const blob = await response.blob()
+    
+    // 创建下载链接
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    
+    // 根据格式设置文件名
+    const formatExtensions = {
+      pdf: 'pdf',
+      docx: 'docx',
+      md: 'md'
+    }
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-')
+    a.download = `标书文档_${timestamp}.${formatExtensions[exportFormat.value as keyof typeof formatExtensions]}`
+    
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
     
     ElMessage.success(`文档已导出为 ${exportFormat.value.toUpperCase()} 格式`)
     showExportDialog.value = false
-  } catch (error) {
+  } catch (error: any) {
     console.error('导出文档失败:', error)
-    ElMessage.error('导出文档失败')
+    ElMessage.error(error.response?.data?.detail || '导出文档失败')
   } finally {
     exporting.value = false
   }
 }
 
+// 监听选中的大纲ID变化
+watch(() => props.selectedOutlineId, async (newOutlineId) => {
+  if (newOutlineId) {
+    // 如果指定了大纲ID，尝试生成对应的文档内容
+    await generateDocumentForOutline(newOutlineId)
+  }
+})
+
+const generateDocumentForOutline = async (outlineId: number) => {
+  try {
+    // 检查是否已有对应的文档
+    const existingDoc = documents.value.find(doc => doc.outline_id === outlineId)
+    if (existingDoc) {
+      document.value = existingDoc
+      documentContent.value = existingDoc.content
+      return
+    }
+    
+    // 生成新的文档内容
+    generating.value = true
+    progressText.value = '正在为选中的大纲节点生成内容...'
+    
+    const response = await documentApi.generateDocument(props.projectId, {
+      outline_id: outlineId,
+      regenerate: false
+    })
+    
+    if (response.status === 'started') {
+      await pollDocumentGeneration()
+    }
+  } catch (error: any) {
+    console.error('生成大纲文档失败:', error)
+    ElMessage.error(error.response?.data?.detail || '生成文档失败')
+  } finally {
+    generating.value = false
+  }
+}
+
+const insertText = (before: string, after: string) => {
+  if (!editorTextarea.value) return
+  
+  const textarea = editorTextarea.value.textarea || editorTextarea.value.$refs.textarea
+  if (!textarea) return
+  
+  const start = textarea.selectionStart
+  const end = textarea.selectionEnd
+  const selectedText = documentContent.value.substring(start, end)
+  
+  const newText = before + selectedText + after
+  const newContent = documentContent.value.substring(0, start) + newText + documentContent.value.substring(end)
+  
+  documentContent.value = newContent
+  
+  // 设置新的光标位置
+  setTimeout(() => {
+    const newCursorPos = start + before.length + selectedText.length + after.length
+    textarea.setSelectionRange(newCursorPos, newCursorPos)
+    textarea.focus()
+  }, 0)
+  
+  handleContentChange()
+}
+
+const printPreview = () => {
+  const printWindow = window.open('', '_blank')
+  if (!printWindow) return
+  
+  const printContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>标书文档 - 打印预览</title>
+      <style>
+        body {
+          font-family: 'Microsoft YaHei', Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 40px 20px;
+        }
+        h1 {
+          font-size: 24px;
+          font-weight: 600;
+          margin: 24px 0 16px 0;
+          color: #1f2937;
+          border-bottom: 2px solid #3b82f6;
+          padding-bottom: 8px;
+        }
+        h2 {
+          font-size: 20px;
+          font-weight: 600;
+          margin: 20px 0 12px 0;
+          color: #374151;
+        }
+        h3 {
+          font-size: 16px;
+          font-weight: 600;
+          margin: 16px 0 8px 0;
+          color: #4b5563;
+        }
+        p {
+          margin: 8px 0;
+        }
+        ul {
+          margin: 8px 0;
+          padding-left: 20px;
+        }
+        li {
+          margin: 4px 0;
+        }
+        .quote-block {
+          border-left: 4px solid #3b82f6;
+          padding: 12px 16px;
+          margin: 16px 0;
+          background-color: #f8faff;
+          border-radius: 0 4px 4px 0;
+        }
+        .quote-block blockquote {
+          margin: 0;
+          font-style: italic;
+          color: #4b5563;
+        }
+        @media print {
+          body {
+            padding: 20px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      ${formattedContent.value}
+    </body>
+    </html>
+  `
+  
+  printWindow.document.write(printContent)
+  printWindow.document.close()
+  
+  // 等待内容加载完成后打开打印对话框
+  setTimeout(() => {
+    printWindow.print()
+  }, 500)
+}
+
 onMounted(() => {
-  loadDocument()
+  loadDocuments()
 })
 </script>
 
@@ -548,6 +723,15 @@ onMounted(() => {
   padding: 0;
 }
 
+.editor-toolbar {
+  padding: 12px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .editor-textarea {
   border: none;
   border-radius: 0;
@@ -636,10 +820,77 @@ onMounted(() => {
   padding: 20px 0;
 }
 
-.export-options h4 {
+.export-section {
+  margin-bottom: 24px;
+}
+
+.export-section h4 {
   margin: 0 0 16px 0;
   font-size: 16px;
   color: #1f2937;
+  font-weight: 600;
+}
+
+.format-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.format-option {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.format-option:hover {
+  border-color: #3b82f6;
+  background-color: #f8faff;
+}
+
+.format-option.is-checked {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
+.format-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.format-info strong {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.format-info span {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.export-section .el-checkbox {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.quote-block {
+  border-left: 4px solid #3b82f6;
+  padding-left: 16px;
+  margin: 16px 0;
+  background-color: #f8faff;
+  padding: 12px 16px;
+  border-radius: 0 4px 4px 0;
+}
+
+.quote-block blockquote {
+  margin: 0;
+  font-style: italic;
+  color: #4b5563;
 }
 
 .dialog-footer {

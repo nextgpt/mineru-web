@@ -37,9 +37,19 @@
               <span v-if="data.content" class="node-description">{{ data.content }}</span>
             </div>
             <div class="node-actions">
-              <el-button size="small" @click.stop="editOutline(data)">
-                编辑
-              </el-button>
+              <el-dropdown @command="handleNodeAction" trigger="click">
+                <el-button size="small" type="text">
+                  操作 <el-icon><ArrowDown /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item :command="{action: 'edit', data}">编辑</el-dropdown-item>
+                    <el-dropdown-item :command="{action: 'addChild', data}" v-if="data.level < 3">添加子节点</el-dropdown-item>
+                    <el-dropdown-item :command="{action: 'copy', data}">复制</el-dropdown-item>
+                    <el-dropdown-item :command="{action: 'delete', data}" divided>删除</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
               <el-button size="small" type="primary" @click.stop="generateContent(data)">
                 生成内容
               </el-button>
@@ -97,46 +107,98 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 添加子节点对话框 -->
+    <el-dialog
+      v-model="showAddDialog"
+      title="添加子节点"
+      width="500px"
+    >
+      <el-form
+        ref="addFormRef"
+        :model="addForm"
+        :rules="addFormRules"
+        label-width="80px"
+      >
+        <el-form-item label="父节点">
+          <el-input
+            :value="currentParentItem?.title || '根节点'"
+            disabled
+          />
+        </el-form-item>
+        <el-form-item label="标题" prop="title">
+          <el-input
+            v-model="addForm.title"
+            placeholder="请输入大纲标题"
+            maxlength="200"
+            show-word-limit
+          />
+        </el-form-item>
+        <el-form-item label="描述" prop="content">
+          <el-input
+            v-model="addForm.content"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入大纲描述（可选）"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showAddDialog = false">取消</el-button>
+          <el-button type="primary" @click="handleAddOutline">
+            添加
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { ElMessage, type FormInstance } from 'element-plus'
-import { Loading, Document } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
+import { Loading, Document, ArrowDown } from '@element-plus/icons-vue'
+import { outlineApi, type BidOutline } from '@/api/projects'
 
 interface Props {
   projectId: number
 }
 
-interface BidOutline {
-  id: number
-  project_id: number
-  user_id: string
-  title: string
-  level: number
-  sequence: string
-  parent_id?: number
-  order_index: number
-  content?: string
-  created_at: string
-  children?: BidOutline[]
-}
+
 
 const props = defineProps<Props>()
 
 const outline = ref<BidOutline[]>([])
 const generating = ref(false)
 const showEditDialog = ref(false)
+const showAddDialog = ref(false)
 const editFormRef = ref<FormInstance>()
+const addFormRef = ref<FormInstance>()
 const currentEditItem = ref<BidOutline | null>(null)
+const currentParentItem = ref<BidOutline | null>(null)
 
 const editForm = ref({
   title: '',
   content: ''
 })
 
+const addForm = ref({
+  title: '',
+  content: ''
+})
+
 const editFormRules = {
+  title: [
+    { required: true, message: '请输入大纲标题', trigger: 'blur' },
+    { min: 1, max: 200, message: '标题长度在 1 到 200 个字符', trigger: 'blur' }
+  ]
+}
+
+const addFormRules = {
   title: [
     { required: true, message: '请输入大纲标题', trigger: 'blur' },
     { min: 1, max: 200, message: '标题长度在 1 到 200 个字符', trigger: 'blur' }
@@ -163,102 +225,82 @@ const generateOutline = async () => {
     generating.value = true
     ElMessage.info('开始生成标书大纲，请稍候...')
     
-    // TODO: 调用后端API生成大纲
-    // await outlineApi.generateOutline(props.projectId)
+    const response = await outlineApi.generateOutline(props.projectId)
     
-    // 模拟生成过程
-    setTimeout(() => {
-      generating.value = false
-      ElMessage.success('标书大纲生成完成')
-      loadOutline()
-    }, 3000)
-  } catch (error) {
+    if (response.status === 'exists') {
+      ElMessage.info('大纲已存在，正在加载...')
+      await loadOutline()
+    } else if (response.status === 'started') {
+      ElMessage.success('大纲生成已开始，请稍后刷新查看结果')
+      // 轮询检查生成状态
+      pollOutlineGeneration()
+    }
+  } catch (error: any) {
     console.error('生成大纲失败:', error)
-    ElMessage.error('生成大纲失败')
+    ElMessage.error(error.response?.data?.detail || '生成大纲失败')
+  } finally {
     generating.value = false
   }
 }
 
+const pollOutlineGeneration = async () => {
+  const maxAttempts = 30 // 最多轮询30次（约5分钟）
+  let attempts = 0
+  
+  const poll = async () => {
+    try {
+      attempts++
+      const response = await loadOutline()
+      
+      if (outline.value.length > 0) {
+        ElMessage.success('标书大纲生成完成')
+        return
+      }
+      
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 10000) // 每10秒轮询一次
+      } else {
+        ElMessage.warning('大纲生成时间较长，请稍后手动刷新查看')
+      }
+    } catch (error) {
+      console.error('轮询大纲状态失败:', error)
+    }
+  }
+  
+  setTimeout(poll, 10000) // 10秒后开始第一次轮询
+}
+
 const loadOutline = async () => {
   try {
-    // TODO: 调用后端API获取大纲
-    // outline.value = await outlineApi.getOutline(props.projectId)
+    const response = await outlineApi.getOutline(props.projectId)
     
-    // 模拟数据
-    outline.value = [
-      {
-        id: 1,
-        project_id: props.projectId,
-        user_id: 'user123',
-        title: '项目概述',
-        level: 1,
-        sequence: '1',
-        order_index: 1,
-        content: '项目背景、目标和范围说明',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 2,
-        project_id: props.projectId,
-        user_id: 'user123',
-        title: '项目背景',
-        level: 2,
-        sequence: '1.1',
-        parent_id: 1,
-        order_index: 1,
-        content: '详细描述项目产生的背景和必要性',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 3,
-        project_id: props.projectId,
-        user_id: 'user123',
-        title: '项目目标',
-        level: 2,
-        sequence: '1.2',
-        parent_id: 1,
-        order_index: 2,
-        content: '明确项目要达到的具体目标',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 4,
-        project_id: props.projectId,
-        user_id: 'user123',
-        title: '技术方案',
-        level: 1,
-        sequence: '2',
-        order_index: 2,
-        content: '详细的技术实现方案',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 5,
-        project_id: props.projectId,
-        user_id: 'user123',
-        title: '系统架构设计',
-        level: 2,
-        sequence: '2.1',
-        parent_id: 4,
-        order_index: 1,
-        content: '系统整体架构和技术选型',
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 6,
-        project_id: props.projectId,
-        user_id: 'user123',
-        title: '功能模块设计',
-        level: 2,
-        sequence: '2.2',
-        parent_id: 4,
-        order_index: 2,
-        content: '各功能模块的详细设计',
-        created_at: new Date().toISOString()
+    if (response.status === 'success' && response.outline) {
+      // 将树形结构转换为扁平结构
+      const flattenOutline = (items: BidOutline[]): BidOutline[] => {
+        const result: BidOutline[] = []
+        
+        const traverse = (nodes: BidOutline[]) => {
+          nodes.forEach(node => {
+            result.push(node)
+            if (node.children && node.children.length > 0) {
+              traverse(node.children)
+            }
+          })
+        }
+        
+        traverse(items)
+        return result
       }
-    ]
-  } catch (error) {
+      
+      outline.value = flattenOutline(response.outline)
+    } else {
+      outline.value = []
+    }
+  } catch (error: any) {
     console.error('加载大纲失败:', error)
+    if (error.response?.status !== 404) {
+      ElMessage.error('加载大纲失败')
+    }
   }
 }
 
@@ -278,8 +320,10 @@ const handleEditOutline = async () => {
     const valid = await editFormRef.value.validate()
     if (!valid) return
     
-    // TODO: 调用后端API更新大纲
-    // await outlineApi.updateOutline(currentEditItem.value.id, editForm.value)
+    await outlineApi.updateOutlineNode(props.projectId, currentEditItem.value.id, {
+      title: editForm.value.title,
+      content: editForm.value.content
+    })
     
     // 更新本地数据
     const item = outline.value.find(o => o.id === currentEditItem.value!.id)
@@ -290,16 +334,117 @@ const handleEditOutline = async () => {
     
     ElMessage.success('大纲更新成功')
     showEditDialog.value = false
-  } catch (error) {
+  } catch (error: any) {
     console.error('更新大纲失败:', error)
-    ElMessage.error('更新大纲失败')
+    ElMessage.error(error.response?.data?.detail || '更新大纲失败')
+  }
+}
+
+const handleNodeAction = (command: {action: string, data: BidOutline}) => {
+  const { action, data } = command
+  
+  switch (action) {
+    case 'edit':
+      editOutline(data)
+      break
+    case 'addChild':
+      addChildNode(data)
+      break
+    case 'copy':
+      copyOutlineNode(data)
+      break
+    case 'delete':
+      deleteOutlineNode(data)
+      break
+  }
+}
+
+const addChildNode = (parentItem: BidOutline) => {
+  currentParentItem.value = parentItem
+  addForm.value = {
+    title: '',
+    content: ''
+  }
+  showAddDialog.value = true
+}
+
+const handleAddOutline = async () => {
+  if (!addFormRef.value || !currentParentItem.value) return
+  
+  try {
+    const valid = await addFormRef.value.validate()
+    if (!valid) return
+    
+    const newNode = await outlineApi.createOutlineNode(props.projectId, {
+      title: addForm.value.title,
+      content: addForm.value.content,
+      level: currentParentItem.value.level + 1,
+      parent_id: currentParentItem.value.id
+    })
+    
+    // 重新加载大纲
+    await loadOutline()
+    
+    ElMessage.success('子节点添加成功')
+    showAddDialog.value = false
+  } catch (error: any) {
+    console.error('添加子节点失败:', error)
+    ElMessage.error(error.response?.data?.detail || '添加子节点失败')
+  }
+}
+
+const copyOutlineNode = async (item: BidOutline) => {
+  try {
+    await outlineApi.copyOutlineNode(props.projectId, item.id, {
+      target_parent_id: item.parent_id
+    })
+    
+    // 重新加载大纲
+    await loadOutline()
+    
+    ElMessage.success('节点复制成功')
+  } catch (error: any) {
+    console.error('复制节点失败:', error)
+    ElMessage.error(error.response?.data?.detail || '复制节点失败')
+  }
+}
+
+const deleteOutlineNode = async (item: BidOutline) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除"${item.title}"及其所有子节点吗？`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+    
+    await outlineApi.deleteOutlineNode(props.projectId, item.id)
+    
+    // 重新加载大纲
+    await loadOutline()
+    
+    ElMessage.success('节点删除成功')
+  } catch (error: any) {
+    if (error === 'cancel') {
+      return
+    }
+    console.error('删除节点失败:', error)
+    ElMessage.error(error.response?.data?.detail || '删除节点失败')
   }
 }
 
 const generateContent = (item: BidOutline) => {
   ElMessage.info(`正在为"${item.title}"生成内容...`)
-  // TODO: 实现内容生成功能
+  // 触发父组件切换到文档标签页并生成内容
+  emit('generateContent', item)
 }
+
+const emit = defineEmits<{
+  generateContent: [item: BidOutline]
+}>()
 
 onMounted(() => {
   loadOutline()

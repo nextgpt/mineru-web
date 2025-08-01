@@ -1,190 +1,308 @@
 <template>
-  <div class="settings-root">
-    <div class="settings-card">
-      <div class="settings-header">系统设置</div>
-      <el-form :model="settings" label-width="120px" class="settings-form">
-        <el-form-item label="强制开启OCR">
-          <el-switch
-            v-model="settings.forceOcr"
-            active-text="开启"
-            inactive-text="关闭"
-            :disabled="settings.backend !== 'pipeline'"
+  <div class="settings-page">
+    <div class="settings-header">
+      <h1 class="page-title">系统设置</h1>
+      <p class="page-subtitle">配置您的应用偏好设置</p>
+    </div>
+
+    <div class="settings-content">
+      <div class="settings-section">
+        <h3 class="section-title">用户信息</h3>
+        <div class="setting-item">
+          <label class="setting-label">用户名</label>
+          <el-input
+            v-model="userSettings.name"
+            placeholder="请输入用户名"
+            style="width: 300px"
           />
-          <div v-if="settings.backend !== 'pipeline'" class="settings-tip">
-            只有在Pipeline模式下可以设置强制OCR
-          </div>
-        </el-form-item>
-        <el-form-item label="OCR识别语言">
-          <el-select v-model="settings.ocrLanguage" class="settings-select">
-            <el-option label="中英日繁混合(ch)" value="ch" />
-            <el-option label="中英日繁混合+手写场景(ch_server)" value="ch_server" />
-            <el-option label="中英日繁混合+手写场景(ch_lite)" value="ch_lite" />
-            <el-option label="英语(en)" value="en" />
-            <el-option label="韩语(korean)" value="korean" />
-            <el-option label="日语(japan)" value="japan" />
-            <el-option label="繁体中文(chinese_cht)" value="chinese_cht" />
-            <el-option label="泰米尔语(ta)" value="ta" />
-            <el-option label="泰卢固语(te)" value="te" />
-            <el-option label="格鲁吉亚语(ka)" value="ka" />
-            <el-option label="拉丁语(latin)" value="latin" />
-            <el-option label="阿拉伯语(arabic)" value="arabic" />
-            <el-option label="东斯拉夫语(east_slavic)" value="east_slavic" />
-            <el-option label="西里尔语(cyrillic)" value="cyrillic" />
-            <el-option label="天城文(devanagari)" value="devanagari" />
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">用户ID</label>
+          <el-input
+            :value="userSettings.id"
+            disabled
+            style="width: 300px"
+          />
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="section-title">应用设置</h3>
+        <div class="setting-item">
+          <label class="setting-label">主题模式</label>
+          <el-select v-model="appSettings.theme" style="width: 300px">
+            <el-option label="浅色模式" value="light" />
+            <el-option label="深色模式" value="dark" />
+            <el-option label="跟随系统" value="auto" />
           </el-select>
-        </el-form-item>
-        <el-form-item label="公式识别">
-          <el-switch
-            v-model="settings.formulaRecognition"
-            active-text="开启"
-            inactive-text="关闭"
-          />
-        </el-form-item>
-        <el-form-item label="表格识别">
-          <el-switch
-            v-model="settings.tableRecognition"
-            active-text="开启"
-            inactive-text="关闭"
-          />
-        </el-form-item>
-        <el-form-item label="后端引擎">
-          <el-select v-model="settings.backend" class="settings-select">
-            <el-option label="Pipeline" value="pipeline" />
-            <el-option label="VLM Transformers" value="vlm-transformers" />
-            <el-option label="VLM SgLang Engine" value="vlm-sglang-engine" />
-            <el-option label="VLM SgLang Client" value="vlm-sglang-client" />
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">语言设置</label>
+          <el-select v-model="appSettings.language" style="width: 300px">
+            <el-option label="简体中文" value="zh-CN" />
+            <el-option label="English" value="en-US" />
           </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="saveSettings" size="large">保存设置</el-button>
-          <el-button @click="resetSettings" size="large">重置</el-button>
-        </el-form-item>
-      </el-form>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 class="section-title">AI 设置</h3>
+        <div class="setting-item">
+          <label class="setting-label">AI 模型</label>
+          <el-select v-model="aiSettings.model" style="width: 300px">
+            <el-option label="GPT-4" value="gpt-4" />
+            <el-option label="GPT-3.5 Turbo" value="gpt-3.5-turbo" />
+            <el-option label="Claude-3" value="claude-3" />
+          </el-select>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">生成质量</label>
+          <el-select v-model="aiSettings.quality" style="width: 300px">
+            <el-option label="高质量（较慢）" value="high" />
+            <el-option label="标准质量" value="standard" />
+            <el-option label="快速生成" value="fast" />
+          </el-select>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <el-button @click="resetSettings">重置设置</el-button>
+        <el-button type="primary" @click="saveSettings" :loading="saving">
+          保存设置
+        </el-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
-import { getUserId } from '@/utils/user'
+import { getUserInfo, setUserInfo } from '@/utils/user'
 
-interface Settings {
-  forceOcr: boolean
-  ocrLanguage: string
-  formulaRecognition: boolean
-  tableRecognition: boolean
-  version: string
-  backend: 'pipeline' | 'vlm-transformers' | 'vlm-sglang-engine' | 'vlm-sglang-client'
-}
+// 响应式数据
+const saving = ref(false)
 
-const defaultSettings: Settings = {
-  forceOcr: false,
-  ocrLanguage: 'ch',  // 将默认值从'auto'改为'ch'
-  formulaRecognition: true,
-  tableRecognition: true,
-  version: '',
-  backend: 'pipeline'
-}
+const userSettings = reactive({
+  id: '',
+  name: ''
+})
 
-const settings = ref<Settings>({ ...defaultSettings })
+const appSettings = reactive({
+  theme: 'light',
+  language: 'zh-CN'
+})
 
-// 加载设置
-const loadSettings = async () => {
-  try {
-    const response = await axios.get('/api/settings', {
-      headers: {
-        'X-User-Id': getUserId()
-      }
-    })
+const aiSettings = reactive({
+  model: 'gpt-4',
+  quality: 'standard'
+})
 
-    settings.value = {
-      forceOcr: response.data.force_ocr,
-      ocrLanguage: response.data.ocr_lang,
-      formulaRecognition: response.data.formula_recognition,
-      tableRecognition: response.data.table_recognition,
-      version: response.data.version || '',
-      backend: response.data.backend || 'pipeline'
-    }
-  } catch (error: any) {
-    console.error('加载设置失败:', error.response?.data || error.message)
-    ElMessage.error(`加载设置失败: ${error.response?.data?.detail || error.message}`)
+// 方法
+const loadSettings = () => {
+  // 加载用户信息
+  const userInfo = getUserInfo()
+  userSettings.id = userInfo.id
+  userSettings.name = userInfo.name
+
+  // 加载应用设置
+  const savedAppSettings = localStorage.getItem('appSettings')
+  if (savedAppSettings) {
+    const parsed = JSON.parse(savedAppSettings)
+    Object.assign(appSettings, parsed)
+  }
+
+  // 加载AI设置
+  const savedAiSettings = localStorage.getItem('aiSettings')
+  if (savedAiSettings) {
+    const parsed = JSON.parse(savedAiSettings)
+    Object.assign(aiSettings, parsed)
   }
 }
 
-// 保存设置
 const saveSettings = async () => {
   try {
-    await axios.put('/api/settings', {
-      force_ocr: settings.value.forceOcr,
-      ocr_lang: settings.value.ocrLanguage,
-      formula_recognition: settings.value.formulaRecognition,
-      table_recognition: settings.value.tableRecognition,
-      version: settings.value.version,
-      backend: settings.value.backend,
-      user_id: getUserId()
-    }, {
-      headers: {
-        'X-User-Id': getUserId()
-      }
-    })
+    saving.value = true
 
-    ElMessage.success('设置已保存')
-  } catch (error: any) {
-    console.error('保存设置失败:', error.response?.data || error.message)
-    ElMessage.error(`保存设置失败: ${error.response?.data?.detail || error.message}`)
+    // 保存用户信息
+    setUserInfo({ name: userSettings.name })
+
+    // 保存应用设置
+    localStorage.setItem('appSettings', JSON.stringify(appSettings))
+
+    // 保存AI设置
+    localStorage.setItem('aiSettings', JSON.stringify(aiSettings))
+
+    ElMessage.success('设置保存成功')
+  } catch (error) {
+    console.error('保存设置失败:', error)
+    ElMessage.error('保存设置失败')
+  } finally {
+    saving.value = false
   }
 }
 
 const resetSettings = () => {
-  settings.value = { ...defaultSettings }
+  // 重置应用设置
+  appSettings.theme = 'light'
+  appSettings.language = 'zh-CN'
+
+  // 重置AI设置
+  aiSettings.model = 'gpt-4'
+  aiSettings.quality = 'standard'
+
   ElMessage.info('设置已重置')
 }
 
-// 组件挂载时加载设置
+// 生命周期
 onMounted(() => {
   loadSettings()
 })
 </script>
 
 <style scoped>
-.settings-root {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 32px 0 0 0;
+.settings-page {
+  padding: 32px;
+  max-width: 800px;
+  margin: 0 auto;
 }
-.settings-card {
-  width: 480px;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.04);
-  padding: 36px 36px 24px 36px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
+
 .settings-header {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 18px;
+  margin-bottom: 40px;
   text-align: center;
 }
-.settings-form {
-  width: 100%;
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 12px 0;
 }
-.settings-select {
-  width: 180px;
+
+.page-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
 }
-:deep(.el-form-item__content) {
-  justify-content: flex-start;
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
 }
-.settings-tip {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 4px;
+
+.settings-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 24px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-label {
+  font-size: 15px;
+  font-weight: 500;
+  color: #374151;
+  min-width: 120px;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  background: #f9fafb;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.settings-actions .el-button {
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.settings-actions .el-button--primary {
+  background: linear-gradient(45deg, #6366f1, #8b5cf6);
+  border: none;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.settings-actions .el-button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.settings-actions .el-button:not(.el-button--primary) {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.settings-actions .el-button:not(.el-button--primary):hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-2px);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 20px;
+  }
+  
+  .page-title {
+    font-size: 28px;
+  }
+  
+  .settings-section {
+    padding: 20px;
+  }
+  
+  .setting-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .setting-label {
+    min-width: auto;
+    margin-bottom: 8px;
+  }
+  
+  .setting-item .el-input,
+  .setting-item .el-select {
+    width: 100% !important;
+  }
+  
+  .settings-actions {
+    flex-direction: column;
+  }
+  
+  .settings-actions .el-button {
+    width: 100%;
+  }
 }
 </style>

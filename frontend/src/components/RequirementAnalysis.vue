@@ -17,6 +17,46 @@
         <el-icon class="analyzing-icon" size="48"><Loading /></el-icon>
         <h4 class="analyzing-title">正在分析招标文件...</h4>
         <p class="analyzing-text">AI正在深度分析招标文件内容，提取关键需求信息，请稍候。</p>
+        
+        <!-- 进度条 -->
+        <div class="progress-container">
+          <el-progress 
+            :percentage="analysisProgress" 
+            :stroke-width="8"
+            :show-text="true"
+            :format="(percentage) => `${percentage}%`"
+            color="#3b82f6"
+          />
+          
+          <!-- 详细步骤 -->
+          <div class="progress-steps">
+            <div 
+              v-for="(step, index) in progressSteps" 
+              :key="step.key"
+              class="progress-step"
+              :class="{
+                'step-completed': step.completed,
+                'step-active': index === currentStep && !step.completed,
+                'step-pending': index > currentStep
+              }"
+            >
+              <div class="step-icon">
+                <el-icon v-if="step.completed" size="16" color="#10b981">
+                  <Check />
+                </el-icon>
+                <el-icon v-else-if="index === currentStep" size="16" color="#3b82f6">
+                  <Loading />
+                </el-icon>
+                <span v-else class="step-number">{{ index + 1 }}</span>
+              </div>
+              <span class="step-label">{{ step.label }}</span>
+            </div>
+          </div>
+          
+          <p class="progress-text">
+            {{ currentStep < progressSteps.length ? progressSteps[currentStep].label + '...' : '分析即将完成...' }}
+          </p>
+        </div>
       </div>
     </div>
 
@@ -90,6 +130,29 @@
       </div>
     </div>
 
+    <!-- 错误状态 -->
+    <div v-else-if="analysisError" class="error-state">
+      <el-icon size="48" color="#ef4444"><Warning /></el-icon>
+      <h4 class="error-title">分析失败</h4>
+      <p class="error-text">{{ analysisError }}</p>
+      <div class="error-actions">
+        <el-button 
+          type="primary" 
+          @click="retryAnalysis"
+          :disabled="retryCount >= maxRetries"
+        >
+          {{ retryCount >= maxRetries ? '已达到最大重试次数' : `重新分析 (${retryCount}/${maxRetries})` }}
+        </el-button>
+        <el-button 
+          v-if="retryCount > 0" 
+          @click="resetRetryCount"
+          type="default"
+        >
+          重置重试次数
+        </el-button>
+      </div>
+    </div>
+
     <!-- 空状态 -->
     <div v-else class="empty-state">
       <el-icon size="48" color="#d1d5db"><Document /></el-icon>
@@ -100,9 +163,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Loading, Document } from '@element-plus/icons-vue'
+import { Loading, Document, Warning, Check } from '@element-plus/icons-vue'
+import { analysisApi } from '@/api/projects'
 
 interface Props {
   projectId: number
@@ -122,59 +186,187 @@ interface RequirementAnalysis {
   created_at: string
 }
 
+interface AnalysisStatus {
+  project_status: string
+  has_analysis: boolean
+  analysis_created_at?: string
+}
+
 const props = defineProps<Props>()
 
 const analysis = ref<RequirementAnalysis | null>(null)
 const analyzing = ref(false)
+const analysisError = ref<string | null>(null)
+const retryCount = ref(0)
+const maxRetries = 3
+const analysisTimeout = ref<number | null>(null)
 const activeRequirementTab = ref('critical')
+const progressInterval = ref<number | null>(null)
+const analysisProgress = ref(0)
+const progressSteps = ref([
+  { key: 'parsing', label: '解析文档结构', completed: false },
+  { key: 'extracting', label: '提取关键信息', completed: false },
+  { key: 'classifying', label: '进行需求分级', completed: false },
+  { key: 'finalizing', label: '生成分析报告', completed: false }
+])
+const currentStep = ref(0)
 
 const startAnalysis = async () => {
   try {
     analyzing.value = true
+    analysisError.value = null
+    analysisProgress.value = 0
     ElMessage.info('开始分析招标文件，请稍候...')
     
-    // TODO: 调用后端API开始分析
-    // await analysisApi.startAnalysis(props.projectId)
+    const response = await analysisApi.startAnalysis(props.projectId)
     
-    // 模拟分析过程
-    setTimeout(() => {
+    if (response.status === 'exists') {
+      ElMessage.info('分析结果已存在')
       analyzing.value = false
-      ElMessage.success('需求分析完成')
-      loadAnalysis()
-    }, 3000)
-  } catch (error) {
+      await loadAnalysis()
+    } else if (response.status === 'started') {
+      ElMessage.success('分析已开始，正在处理中...')
+      startProgressTracking()
+      startAnalysisTimeout()
+    }
+  } catch (error: any) {
     console.error('开始分析失败:', error)
-    ElMessage.error('开始分析失败')
+    const errorMessage = error.response?.data?.detail || '开始分析失败'
+    ElMessage.error(errorMessage)
+    analysisError.value = errorMessage
     analyzing.value = false
+  }
+}
+
+const startAnalysisTimeout = () => {
+  // 设置5分钟超时
+  analysisTimeout.value = window.setTimeout(() => {
+    if (analyzing.value) {
+      analyzing.value = false
+      analysisError.value = '分析超时，请重试'
+      ElMessage.error('分析超时，请重试')
+      stopProgressTracking()
+    }
+  }, 5 * 60 * 1000) // 5分钟
+}
+
+const startProgressTracking = () => {
+  analysisProgress.value = 10
+  currentStep.value = 0
+  
+  // 重置步骤状态
+  progressSteps.value.forEach(step => {
+    step.completed = false
+  })
+  
+  progressInterval.value = window.setInterval(async () => {
+    try {
+      const status = await analysisApi.getAnalysisStatus(props.projectId)
+      
+      if (status.has_analysis) {
+        // 分析完成
+        analysisProgress.value = 100
+        currentStep.value = progressSteps.value.length
+        progressSteps.value.forEach(step => {
+          step.completed = true
+        })
+        analyzing.value = false
+        resetRetryCount() // 成功后重置重试次数
+        ElMessage.success('需求分析完成')
+        await loadAnalysis()
+        stopProgressTracking()
+      } else if (status.project_status === 'analyzing') {
+        // 仍在分析中，更新进度
+        updateProgressSteps()
+      } else if (status.project_status === 'failed') {
+        // 分析失败
+        analyzing.value = false
+        analysisError.value = '分析过程中发生错误'
+        ElMessage.error('分析失败，请重试')
+        stopProgressTracking()
+      }
+    } catch (error) {
+      console.error('获取分析状态失败:', error)
+      // 继续轮询，不中断用户体验
+    }
+  }, 2000) // 每2秒检查一次状态
+}
+
+const updateProgressSteps = () => {
+  const elapsed = Date.now() - (analyzing.value ? Date.now() - 2000 : Date.now())
+  const totalSteps = progressSteps.value.length
+  
+  // 模拟进度更新
+  if (analysisProgress.value < 25) {
+    analysisProgress.value = Math.min(analysisProgress.value + 3, 25)
+    currentStep.value = 0
+  } else if (analysisProgress.value < 50) {
+    analysisProgress.value = Math.min(analysisProgress.value + 2, 50)
+    currentStep.value = 1
+    progressSteps.value[0].completed = true
+  } else if (analysisProgress.value < 75) {
+    analysisProgress.value = Math.min(analysisProgress.value + 2, 75)
+    currentStep.value = 2
+    progressSteps.value[1].completed = true
+  } else if (analysisProgress.value < 90) {
+    analysisProgress.value = Math.min(analysisProgress.value + 1, 90)
+    currentStep.value = 3
+    progressSteps.value[2].completed = true
+  }
+}
+
+const stopProgressTracking = () => {
+  if (progressInterval.value) {
+    clearInterval(progressInterval.value)
+    progressInterval.value = null
+  }
+  if (analysisTimeout.value) {
+    clearTimeout(analysisTimeout.value)
+    analysisTimeout.value = null
   }
 }
 
 const loadAnalysis = async () => {
   try {
-    // TODO: 调用后端API获取分析结果
-    // analysis.value = await analysisApi.getAnalysis(props.projectId)
+    const response = await analysisApi.getAnalysisResult(props.projectId)
     
-    // 模拟数据
-    analysis.value = {
-      id: 1,
-      project_id: props.projectId,
-      user_id: 'user123',
-      project_overview: '这是一个关于智能办公系统建设的招标项目，旨在提升办公效率和数字化水平。',
-      client_info: '招标单位：某市政府办公厅，联系人：张主任，预算范围：100-200万元。',
-      budget_info: '项目总预算约150万元，包含软件开发、硬件采购、实施部署等费用。',
-      detailed_requirements: '系统需要包含文档管理、流程审批、视频会议、即时通讯等核心功能模块。',
-      critical_requirements: '<ul><li>系统稳定性要求99.9%以上</li><li>支持1000+并发用户</li><li>数据安全等级要求三级</li></ul>',
-      important_requirements: '<ul><li>界面友好易用</li><li>移动端适配</li><li>与现有系统集成</li></ul>',
-      general_requirements: '<ul><li>提供用户培训</li><li>一年免费维护</li><li>技术文档完整</li></ul>',
-      created_at: new Date().toISOString()
+    if (response.analysis) {
+      analysis.value = response.analysis
+    } else if (response.status === 'analyzing') {
+      analyzing.value = true
+      startProgressTracking()
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('加载分析结果失败:', error)
+    if (error.response?.status !== 404) {
+      const errorMessage = error.response?.data?.detail || '加载分析结果失败'
+      ElMessage.error(errorMessage)
+    }
   }
+}
+
+const retryAnalysis = async () => {
+  if (retryCount.value >= maxRetries) {
+    ElMessage.error(`已达到最大重试次数 (${maxRetries})，请稍后再试`)
+    return
+  }
+  
+  retryCount.value++
+  analysisError.value = null
+  ElMessage.info(`正在重试... (${retryCount.value}/${maxRetries})`)
+  await startAnalysis()
+}
+
+const resetRetryCount = () => {
+  retryCount.value = 0
 }
 
 onMounted(() => {
   loadAnalysis()
+})
+
+onUnmounted(() => {
+  stopProgressTracking()
 })
 </script>
 
@@ -231,7 +423,125 @@ onMounted(() => {
   font-size: 14px;
   color: #6b7280;
   line-height: 1.5;
-  margin: 0;
+  margin: 0 0 24px 0;
+}
+
+.progress-container {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 24px;
+}
+
+.progress-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.step-completed .step-icon {
+  background: #dcfce7;
+  border: 2px solid #10b981;
+}
+
+.step-active .step-icon {
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
+}
+
+.step-pending .step-icon {
+  background: #f1f5f9;
+  border: 2px solid #cbd5e1;
+}
+
+.step-number {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.step-active .step-number {
+  color: #3b82f6;
+}
+
+.step-label {
+  color: #374151;
+  font-weight: 500;
+}
+
+.step-completed .step-label {
+  color: #059669;
+}
+
+.step-active .step-label {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.step-pending .step-label {
+  color: #9ca3af;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #6b7280;
+  text-align: center;
+  margin: 8px 0 0 0;
+  font-weight: 500;
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+}
+
+.error-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ef4444;
+  margin: 16px 0 8px 0;
+}
+
+.error-text {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  max-width: 400px;
+  margin: 0 0 24px 0;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .analysis-results {
