@@ -153,20 +153,19 @@ const isSettingsPage = () => route.path === '/settings'
   flex: 1;
   background: #f7f8fa;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
   padding: 24px 0;
   box-sizing: border-box;
 }
 
 .content-card {
-  width: calc(100vw - 80px - 48px); /* 减去侧边栏宽度和边距 */
-  max-width: 1200px;
+  width: calc(100vw - 80px - 54px); /* 减去侧边栏宽度和左右边距(27px * 2) */
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 4px 24px 0 rgba(0,0,0,0.04);
   padding: 20px 16px 24px 16px;
-  margin: 0 24px;
+  margin: 0 27px; /* 导航栏宽度的1/3 (80px / 3 ≈ 27px) */
   position: relative;
   transition: all 0.2s;
   box-sizing: border-box;
