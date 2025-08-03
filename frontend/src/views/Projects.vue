@@ -1,125 +1,193 @@
 <template>
   <div class="projects-page">
+    <!-- 页面头部 -->
     <div class="page-header">
       <div class="header-left">
-        <h1 class="page-title">项目管理</h1>
-        <p class="page-subtitle">管理您的招标项目和生成的标书</p>
+        <h1 class="page-title">文档列表</h1>
+        <p class="page-subtitle">共{{ total }}个文档数据</p>
       </div>
       <div class="header-right">
-        <el-button type="primary" @click="showCreateDialog = true">
-          <el-icon><Upload /></el-icon>
-          新建项目
-        </el-button>
-      </div>
-    </div>
-
-    <div class="page-content">
-      <!-- 搜索和筛选 -->
-      <div class="search-bar">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索项目名称..."
+          placeholder="请输入查询名称"
           clearable
           @input="handleSearch"
-          style="width: 300px"
+          style="width: 240px; margin-right: 12px"
         >
-          <template #prefix>
-            <el-icon><Setting /></el-icon>
+          <template #suffix>
+            <el-icon><Search /></el-icon>
           </template>
         </el-input>
         
-        <el-select
-          v-model="statusFilter"
-          placeholder="筛选状态"
-          clearable
-          @change="handleStatusFilter"
-          style="width: 150px; margin-left: 16px"
-        >
-          <el-option label="全部状态" value="" />
-          <el-option label="已创建" value="created" />
-          <el-option label="解析中" value="parsing" />
-          <el-option label="分析中" value="analyzing" />
-          <el-option label="大纲已生成" value="outline_generated" />
-          <el-option label="生成中" value="document_generating" />
-          <el-option label="已完成" value="completed" />
-          <el-option label="失败" value="failed" />
-        </el-select>
-      </div>
-
-      <!-- 项目列表 -->
-      <div class="projects-table">
-        <el-table
-          :data="projects"
-          v-loading="loading"
-          empty-text="暂无项目数据"
-          @row-click="handleRowClick"
-          style="width: 100%"
-        >
-          <el-table-column prop="name" label="项目名称" min-width="200">
-            <template #default="{ row }">
-              <div class="project-name">
-                <span class="name-text">{{ row.name }}</span>
-                <span v-if="row.description" class="description-text">{{ row.description }}</span>
-              </div>
-            </template>
-          </el-table-column>
-          
-          <el-table-column prop="status" label="状态" width="120">
-            <template #default="{ row }">
-              <el-tag :type="getStatusType(row.status)" size="small">
-                {{ getStatusText(row.status) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          
-          <el-table-column prop="original_file" label="招标文件" width="200">
-            <template #default="{ row }">
-              <div v-if="row.original_file" class="file-info">
-                <el-icon><Document /></el-icon>
-                <span class="file-name">{{ row.original_file.filename }}</span>
-              </div>
-              <span v-else class="no-file">未上传</span>
-            </template>
-          </el-table-column>
-          
-          <el-table-column prop="created_at" label="创建时间" width="180">
-            <template #default="{ row }">
-              {{ formatDate(row.created_at) }}
-            </template>
-          </el-table-column>
-          
-          <el-table-column label="操作" width="200" fixed="right">
-            <template #default="{ row }">
-              <el-button size="small" @click.stop="viewProject(row)">
-                查看
-              </el-button>
-              <el-button size="small" type="primary" @click.stop="editProject(row)">
-                编辑
-              </el-button>
-              <el-button 
-                size="small" 
-                type="danger" 
-                @click.stop="deleteProject(row)"
-              >
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-
-        <!-- 分页 -->
-        <div class="pagination-wrapper">
-          <el-pagination
-            v-model:current-page="currentPage"
-            v-model:page-size="pageSize"
-            :page-sizes="[10, 20, 50, 100]"
-            :total="total"
-            layout="total, sizes, prev, pager, next, jumper"
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-          />
+        <!-- 视图切换按钮 -->
+        <div class="view-toggle">
+          <el-button-group>
+            <el-button 
+              :type="viewMode === 'list' ? 'primary' : 'default'"
+              @click="viewMode = 'list'"
+              size="small"
+            >
+              列表模式
+            </el-button>
+            <el-button 
+              :type="viewMode === 'card' ? 'primary' : 'default'"
+              @click="viewMode = 'card'"
+              size="small"
+            >
+              卡片模式
+            </el-button>
+          </el-button-group>
         </div>
       </div>
+    </div>
+
+    <!-- 卡片模式 -->
+    <div v-if="viewMode === 'card'" class="card-view">
+      <div class="projects-grid">
+        <!-- 新建标书卡片 - 永远第一个 -->
+        <div class="project-card create-card" @click="showCreateDialog = true">
+          <div class="create-card-content">
+            <div class="create-icon">
+              <div class="file-icons">
+                <div class="file-icon doc"></div>
+                <div class="file-icon docx"></div>
+                <div class="file-icon pdf"></div>
+              </div>
+            </div>
+            <div class="create-text">
+              <h3>新建标书</h3>
+              <p>支持(.doc/.docx/.pdf)格式文件一次性上传多个文件</p>
+              <el-button type="primary" class="upload-btn">
+                选择上传招标文件
+              </el-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 项目卡片 -->
+        <div 
+          v-for="project in projects" 
+          :key="project.id" 
+          class="project-card"
+          @click="viewProject(project)"
+        >
+          <div class="card-header">
+            <el-tag 
+              :type="getStatusType(project.status)" 
+              size="small"
+              class="status-tag"
+            >
+              {{ getStatusText(project.status) }}
+            </el-tag>
+            <el-dropdown @command="handleCardAction" trigger="click">
+              <el-icon class="more-icon"><MoreFilled /></el-icon>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item :command="{action: 'view', project}">查看</el-dropdown-item>
+                  <el-dropdown-item :command="{action: 'edit', project}">编辑</el-dropdown-item>
+                  <el-dropdown-item :command="{action: 'delete', project}">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+          
+          <div class="card-content">
+            <h3 class="project-title">{{ project.name }}</h3>
+            <p v-if="project.description" class="project-description">{{ project.description }}</p>
+            
+            <div class="project-meta">
+              <div class="meta-item">
+                <span class="meta-label">创建时间:</span>
+                <span class="meta-value">{{ formatDate(project.created_at) }}</span>
+              </div>
+              <div v-if="project.original_file" class="meta-item">
+                <span class="meta-label">文件:</span>
+                <span class="meta-value">{{ project.original_file.filename }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-if="projects.length === 0 && !loading" class="empty-state">
+        <p>- 数据到底了 -</p>
+      </div>
+    </div>
+
+    <!-- 列表模式 -->
+    <div v-else class="list-view">
+      <el-table
+        :data="projects"
+        v-loading="loading"
+        empty-text="暂无项目数据"
+        @row-click="handleRowClick"
+        style="width: 100%"
+      >
+        <el-table-column prop="name" label="项目名称" min-width="200">
+          <template #default="{ row }">
+            <div class="project-name">
+              <span class="name-text">{{ row.name }}</span>
+              <span v-if="row.description" class="description-text">{{ row.description }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        
+        <el-table-column prop="status" label="状态" width="120">
+          <template #default="{ row }">
+            <el-tag :type="getStatusType(row.status)" size="small">
+              {{ getStatusText(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        
+        <el-table-column prop="original_file" label="招标文件" width="200">
+          <template #default="{ row }">
+            <div v-if="row.original_file" class="file-info">
+              <el-icon><Document /></el-icon>
+              <span class="file-name">{{ row.original_file.filename }}</span>
+            </div>
+            <span v-else class="no-file">未上传</span>
+          </template>
+        </el-table-column>
+        
+        <el-table-column prop="created_at" label="创建时间" width="180">
+          <template #default="{ row }">
+            {{ formatDate(row.created_at) }}
+          </template>
+        </el-table-column>
+        
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="{ row }">
+            <el-button size="small" @click.stop="viewProject(row)">
+              查看
+            </el-button>
+            <el-button size="small" type="primary" @click.stop="editProject(row)">
+              编辑
+            </el-button>
+            <el-button 
+              size="small" 
+              type="danger" 
+              @click.stop="deleteProject(row)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <!-- 分页 -->
+    <div class="pagination-wrapper">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[12, 24, 48]"
+        :total="total"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
     </div>
 
     <!-- 创建项目对话框 -->
@@ -171,7 +239,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { Upload, Document, Setting } from '@element-plus/icons-vue'
+import { Upload, Document, Setting, Search, MoreFilled } from '@element-plus/icons-vue'
 import { projectsApi, type Project, type CreateProjectRequest } from '@/api/projects'
 
 const router = useRouter()
@@ -183,8 +251,9 @@ const creating = ref(false)
 const searchQuery = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(12)
 const total = ref(0)
+const viewMode = ref<'card' | 'list'>('card')
 
 // 创建项目对话框
 const showCreateDialog = ref(false)
@@ -356,6 +425,22 @@ const handleCreateProject = async () => {
   }
 }
 
+// 卡片操作处理
+const handleCardAction = (command: {action: string, project: Project}) => {
+  const { action, project } = command
+  switch (action) {
+    case 'view':
+      viewProject(project)
+      break
+    case 'edit':
+      editProject(project)
+      break
+    case 'delete':
+      deleteProject(project)
+      break
+  }
+}
+
 // 生命周期
 onMounted(() => {
   loadProjects()
@@ -364,7 +449,7 @@ onMounted(() => {
 
 <style scoped>
 .projects-page {
-  padding: 24px;
+  padding: 0;
   background: #f7f8fa;
   min-height: 100vh;
 }
@@ -372,12 +457,9 @@ onMounted(() => {
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-  background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  align-items: center;
+  padding: 20px 0;
+  margin-bottom: 20px;
 }
 
 .header-left {
@@ -385,10 +467,10 @@ onMounted(() => {
 }
 
 .page-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
 }
 
 .page-subtitle {
@@ -399,25 +481,188 @@ onMounted(() => {
 
 .header-right {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.page-content {
+.view-toggle {
+  margin-left: 12px;
+}
+
+/* 卡片视图 */
+.card-view {
+  margin-bottom: 24px;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.project-card {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
   overflow: hidden;
 }
 
-.search-bar {
-  padding: 20px 24px;
-  border-bottom: 1px solid #f0f0f0;
-  display: flex;
-  align-items: center;
+.project-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
-.projects-table {
-  padding: 0 24px 24px 24px;
+/* 新建标书卡片 */
+.create-card {
+  border: 2px dashed #d1d5db;
+  background: #fafafa;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-card:hover {
+  border-color: #3b82f6;
+  background: #f8faff;
+}
+
+.create-card-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.create-icon {
+  margin-bottom: 16px;
+}
+
+.file-icons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.file-icon {
+  width: 32px;
+  height: 40px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.file-icon.doc {
+  background: #4285f4;
+}
+
+.file-icon.docx {
+  background: #0078d4;
+}
+
+.file-icon.pdf {
+  background: #ff5722;
+}
+
+.create-text h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.create-text p {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.upload-btn {
+  font-size: 14px;
+}
+
+/* 项目卡片 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 0 16px;
+}
+
+.status-tag {
+  font-size: 12px;
+}
+
+.more-icon {
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.more-icon:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.card-content {
+  padding: 12px 16px 16px 16px;
+}
+
+.project-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.project-description {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+}
+
+.meta-label {
+  color: #9ca3af;
+  margin-right: 4px;
+  min-width: 60px;
+}
+
+.meta-value {
+  color: #374151;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 列表视图 */
+.list-view {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
 }
 
 .project-name {
@@ -453,12 +698,19 @@ onMounted(() => {
   font-size: 13px;
 }
 
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* 分页 */
 .pagination-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #f0f0f0;
+  padding: 20px 0;
 }
 
 .dialog-footer {
@@ -469,8 +721,9 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .projects-page {
-    padding: 16px;
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
   
   .page-header {
@@ -479,16 +732,19 @@ onMounted(() => {
     align-items: stretch;
   }
   
-  .search-bar {
+  .header-right {
     flex-direction: column;
     gap: 12px;
-    align-items: stretch;
   }
   
-  .search-bar .el-input,
-  .search-bar .el-select {
+  .header-right .el-input {
     width: 100% !important;
-    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .projects-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 }
 </style>
