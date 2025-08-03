@@ -23,7 +23,7 @@ def main():
         'LLM_MODEL_NAME': 'Qwen3-30B-A3B-FP8',
         'DEBUG': 'true',
         'HOST': '0.0.0.0',
-        'PORT': '8000',
+        'PORT': '8088',
         'PRELOAD_MODEL': 'false'
     })
     
@@ -39,7 +39,7 @@ def main():
         uvicorn.run(
             "main:app",
             host="0.0.0.0",
-            port=8000,
+            port=8088,
             reload=True,
             reload_dirs=["app"],
             log_level="info"

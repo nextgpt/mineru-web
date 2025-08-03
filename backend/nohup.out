@@ -1,0 +1,1118 @@
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [2995261] using WatchFiles
+2025-08-02 00:44:22.537 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [2995263]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:55818 - "GET /ping HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55920 - "GET /api/projects HTTP/1.1" 400 Bad Request
+INFO:     192.168.5.158:55950 - "GET /api/files HTTP/1.1" 400 Bad Request
+INFO:     192.168.5.158:58558 - "POST /api/upload HTTP/1.1" 422 Unprocessable Entity
+WARNING:  WatchFiles detected changes in 'main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [2995263]
+🚪 应用退出，清理资源
+2025-08-02 00:52:05.424 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [3029087]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1857B2C5BC87670C, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.30.220:52416 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.30.220:26130 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:39680 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:36896 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     192.168.30.220:36900 - "POST /api/projects/1/upload HTTP/1.1" 404 Not Found
+INFO:     192.168.30.220:5314 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5324 - "POST /api/projects/2/upload HTTP/1.1" 404 Not Found
+INFO:     192.168.5.158:63887 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:63887 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1857FCC01DD3D9F1, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:63888 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [640524] using WatchFiles
+2025-08-02 23:55:25.106 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [640526]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:50265 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:50265 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1857FE45B5BCB41C, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:50266 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1857FE8C2188DFD2, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:50514 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.5.158:50518 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:50518 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1857FE9029165285, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:50519 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+ERROR:    [Errno 98] Address already in use
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+ERROR:    [Errno 98] Address already in use
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [672261] using WatchFiles
+2025-08-03 00:02:46.492 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [672263]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1857FEA85E3E6375, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:50573 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1857FECC9B15FF8E, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:51593 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.5.158:55316 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55316 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55317 - "GET /api/files?page=1&page_size=20 HTTP/1.1" 400 Bad Request
+INFO:     192.168.5.158:55354 - "POST /api/upload HTTP/1.1" 400 Bad Request
+INFO:     192.168.5.158:55401 - "POST /api/upload HTTP/1.1" 400 Bad Request
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1858018BF9C3A293, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:55406 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [918276] using WatchFiles
+2025-08-03 00:59:42.805 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [918280]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:55538 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55538 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 185801C5B0A81323, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:55539 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [936170] using WatchFiles
+2025-08-03 01:03:50.535 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [936174]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 185801FEDA64A14A, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:55694 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [956375] using WatchFiles
+2025-08-03 01:08:20.309 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [956377]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:56805 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:56805 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1858023F53B20571, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:56806 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 185802A97D2D3291, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:57254 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [996462] using WatchFiles
+2025-08-03 01:17:14.293 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [996464]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:57278 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:57278 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 185802B9BFA7BD4B, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:57279 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [1017865] using WatchFiles
+2025-08-03 01:22:07.431 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1017873]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:58362 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:58362 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 185802FE079F3C0D, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:58363 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1858032D4A360BE1, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:58512 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1858034837355E8C, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:58575 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.5.158:58681 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:58681 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1858036ED88FDEDE, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:58682 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [1056962] using WatchFiles
+2025-08-03 01:31:06.714 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1056981]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:58737 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:58737 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1858037AFBB3D4E1, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:58738 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 18580390196E9535, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:58819 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+WARNING:  WatchFiles detected changes in 'test.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1056981]
+🚪 应用退出，清理资源
+WARNING:  WatchFiles detected changes in 'test.py'. Reloading...
+2025-08-03 01:41:17.441 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1100825]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'test.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1100825]
+🔄 启动 MinerU Web 后端服务...
+🚪 应用退出，清理资源
+2025-08-03 01:41:23.182 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1101280]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'test.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1101280]
+🔄 启动 MinerU Web 后端服务...
+🚪 应用退出，清理资源
+WARNING:  WatchFiles detected changes in 'test.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'test.py'. Reloading...
+2025-08-03 01:43:15.805 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1109497]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 185804244B1F60B1, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:60366 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [1117452] using WatchFiles
+2025-08-03 01:45:03.527 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1117455]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.30.220:63130 - "POST /api/upload HTTP/1.1" 422 Unprocessable Entity
+INFO:     192.168.5.158:60473 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:60473 - "GET /openapi.json HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 18580445E9B64C5D, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.5.158:60474 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.30.220:29316 - "POST /api/upload HTTP/1.1" 422 Unprocessable Entity
+INFO:     192.168.30.220:39450 - "POST /api/upload HTTP/1.1" 422 Unprocessable Entity
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 1858046D37C9ADA3, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+INFO:     192.168.30.220:28444 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+WARNING:  WatchFiles detected changes in 'test.py', 'test_minio.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1117455]
+🚪 应用退出，清理资源
+2025-08-03 01:51:14.134 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1144262]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 18580490F8EB217F, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.30.220:53508 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [1153254] using WatchFiles
+2025-08-03 01:53:18.890 | ERROR    | app.utils.redis_client:__init__:27 - Could not connect to Redis: Authentication required.
+INFO:     Started server process [1153257]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 37, in upload_files
+    upload_file(
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 25, in upload_file
+    ensure_bucket()
+  File "/data/_caiqiang/github/mineru-web/backend/app/utils/minio_client.py", line 20, in ensure_bucket
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 662, in bucket_exists
+    self._execute("HEAD", bucket_name)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 413, in _execute
+    region = self._get_region(bucket_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 470, in _get_region
+    response = self._url_open(
+               ^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/minio/api.py", line 399, in _url_open
+    raise response_error
+minio.error.S3Error: S3 operation failed; code: InvalidAccessKeyId, message: The Access Key Id you provided does not exist in our records., resource: /mineru-files, request_id: 185804B062204457, host_id: dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8, bucket_name: mineru-files
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.30.220:13308 - "POST /api/upload HTTP/1.1" 500 Internal Server Error
+INFO:     Will watch for changes in these directories: ['/data/_caiqiang/github/mineru-web/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8088 (Press CTRL+C to quit)
+INFO:     Started reloader process [1193755] using WatchFiles
+2025-08-03 02:02:36.363 | INFO     | app.utils.redis_client:__init__:25 - Redis connection successful!
+INFO:     Started server process [1193757]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.5.158:62233 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:62233 - "GET /openapi.json HTTP/1.1" 200 OK
+2025-08-03 02:02:55.290 | INFO     | app.services.parser:queue_parse_file:215 - Publishing task to stream file_parser_stream: {'file_id': 4, 'user_id': '111', 'parse_method': 'auto'}
+INFO:     192.168.5.158:62234 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:     192.168.30.220:26738 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     192.168.30.220:26744 - "POST /api/projects/3/upload HTTP/1.1" 404 Not Found
+2025-08-03 02:04:50.877 | INFO     | app.services.parser:queue_parse_file:215 - Publishing task to stream file_parser_stream: {'file_id': 5, 'user_id': 'user_1754041100970_1yhl7j5h5', 'parse_method': 'auto'}
+INFO:     192.168.30.220:56172 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:     192.168.30.220:57342 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:57350 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:1170 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:1186 - "GET /api/files?page=1&page_size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:1202 - "GET /api/files/5/download_url HTTP/1.1" 200 OK
+INFO:     192.168.30.220:1198 - "GET /api/files/5/parsed_content HTTP/1.1" 200 OK
+INFO:     192.168.30.220:14894 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:58532 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:58542 - "DELETE /api/projects/3 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:58546 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:45658 - "DELETE /api/projects/2 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:45664 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:45672 - "DELETE /api/projects/1 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:45686 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:45700 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:14410 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     192.168.30.220:14412 - "GET /api/projects/1 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:14444 - "GET /api/projects/1/documents HTTP/1.1" 200 OK
+INFO:     192.168.30.220:14438 - "GET /api/projects/1/analysis HTTP/1.1" 200 OK
+INFO:     192.168.30.220:14428 - "GET /api/projects/1/outline HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5336 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:58276 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:58282 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:58294 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+2025-08-03 02:07:07.855 | INFO     | app.services.parser:parse_file:102 - User settings: {'user_id': 'user_1754041100970_1yhl7j5h5', 'ocr_lang': 'ch', 'force_ocr': False, 'table_recognition': True, 'formula_recognition': True, 'backend': 'pipeline'}
+2025-08-03 02:07:07.940 | INFO     | app.services.parser:parse_file:125 - Starting document parsing for file: fbeceea0-ecac-4f6e-b195-7d84c3894997.pdf
+2025-08-03 02:07:07.940 | INFO     | app.services.parser:parse_file:126 - Using backend: pipeline, method: auto
+2025-08-03 02:07:07.942 | INFO     | app.services.mineru_client:upload_document:117 - Uploading document to MinerU: http://192.168.30.54:8088/api/v1/documents/parse
+2025-08-03 02:07:07.943 | INFO     | app.services.mineru_client:upload_document:118 - Parameters: method=auto, lang=ch, backend=pipeline
+INFO:     192.168.30.220:21450 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+2025-08-03 02:07:08.045 | ERROR    | app.services.mineru_client:upload_document:135 - Unexpected error during document upload: Upload failed with status 404: {"detail":"Not Found"}
+2025-08-03 02:07:08.054 | ERROR    | app.services.parser:parse_file:178 - Document parsing failed: Upload error: Upload failed with status 404: {"detail":"Not Found"}
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 123, in upload_document
+    raise MinerUException(
+app.services.mineru_client.MinerUException: Upload failed with status 404: {"detail":"Not Found"}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/parser.py", line 128, in parse_file
+    parse_result = self.mineru_client.parse_document_sync(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 340, in parse_document_sync
+    return loop.run_until_complete(_parse())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 327, in _parse
+    return await self.parse_document_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 253, in parse_document_async
+    upload_result = await self.upload_document(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/tenacity/_asyncio.py", line 88, in async_wrapped
+    return await fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/tenacity/_asyncio.py", line 47, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 314, in iter
+    return fut.result()
+           ^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/tenacity/_asyncio.py", line 50, in __call__
+    result = await fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 136, in upload_document
+    raise MinerUException(f"Upload error: {e}")
+app.services.mineru_client.MinerUException: Upload error: Upload failed with status 404: {"detail":"Not Found"}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/parsed.py", line 63, in parse_file
+    result = parser.parse_file(file, user_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/parser.py", line 179, in parse_file
+    raise Exception(f"解析失败: {str(e)}")
+Exception: 解析失败: Upload error: Upload failed with status 404: {"detail":"Not Found"}
+INFO:     192.168.30.220:21436 - "POST /api/files/5/parse HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.30.220:21466 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:21472 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:21478 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42916 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42920 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42930 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40920 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40930 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40934 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43488 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43490 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43494 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43510 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:52864 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:52868 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:52882 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53552 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53556 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53558 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22114 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22122 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22124 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22128 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:37756 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:37768 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:37770 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:49204 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:49218 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:49220 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61574 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61580 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61582 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61596 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22384 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22400 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22408 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5806 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5812 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5816 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43238 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43244 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43256 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:43264 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35192 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35204 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35212 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40258 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40268 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40274 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:18058 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35786 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:24916 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:14582 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/services/mineru_client.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1193757]
+🚪 应用退出，清理资源
+2025-08-03 02:12:18.678 | INFO     | app.utils.redis_client:__init__:25 - Redis connection successful!
+Process SpawnProcess-2:
+Traceback (most recent call last):
+  File "/root/.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/root/.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 76, in subprocess_started
+    target(sockets=sockets)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 61, in run
+    return asyncio.run(self.serve(sockets=sockets))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/uvicorn/server.py", line 68, in serve
+    config.load()
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/uvicorn/config.py", line 467, in load
+    self.loaded_app = import_from_string(self.app)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/uvicorn/importer.py", line 21, in import_from_string
+    module = importlib.import_module(module_str)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.11.11-linux-x86_64-gnu/lib/python3.11/importlib/__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1204, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "/data/_caiqiang/github/mineru-web/backend/main.py", line 7, in <module>
+    from app.api import upload_router, files_router, parsed_router, settings_router
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/__init__.py", line 1, in <module>
+    from .upload import router as upload_router
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/upload.py", line 8, in <module>
+    from app.services.parser import ParserService
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/parser.py", line 22, in <module>
+    from app.services.mineru_client import MinerUClient, mineru_client
+ImportError: cannot import name 'MinerUClient' from 'app.services.mineru_client' (/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py)
+WARNING:  WatchFiles detected changes in 'app/services/mineru_client.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'app/services/mineru_client.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'app/services/mineru_client.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'app/services/mineru_client.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'app/services/mineru_client.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'app/services/mineru_client.py'. Reloading...
+2025-08-03 02:12:30.718 | INFO     | app.utils.redis_client:__init__:25 - Redis connection successful!
+INFO:     Started server process [1237793]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+🔄 启动 MinerU Web 后端服务...
+INFO:     192.168.30.220:33852 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:33862 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+2025-08-03 02:12:54.617 | INFO     | app.services.parser:parse_file:102 - User settings: {'user_id': 'user_1754041100970_1yhl7j5h5', 'ocr_lang': 'ch', 'force_ocr': False, 'table_recognition': True, 'formula_recognition': True, 'backend': 'pipeline'}
+2025-08-03 02:12:54.703 | INFO     | app.services.parser:parse_file:125 - Starting document parsing for file: fbeceea0-ecac-4f6e-b195-7d84c3894997.pdf
+2025-08-03 02:12:54.704 | INFO     | app.services.parser:parse_file:126 - Using backend: pipeline, method: auto
+2025-08-03 02:12:54.706 | INFO     | app.services.mineru_client:upload_document:118 - Uploading document to MinerU: http://192.168.30.54:8088/file_parse
+2025-08-03 02:12:54.706 | INFO     | app.services.mineru_client:upload_document:119 - Parameters: method=auto, lang=ch, backend=pipeline
+INFO:     192.168.30.220:33876 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:9370 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:9386 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:9398 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:24528 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:24536 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:24552 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:24562 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:56832 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:56836 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:56842 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53590 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53606 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53616 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40990 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:40996 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:41002 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:41018 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:48398 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:48412 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:48414 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:60290 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:60294 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:60308 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:25608 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:7994 - "POST /api/projects HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8006 - "POST /api/projects/2/upload HTTP/1.1" 404 Not Found
+INFO:     192.168.30.220:8010 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8014 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8020 - "GET /api/projects/2 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8026 - "GET /api/projects/2/analysis HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8030 - "GET /api/projects/2/documents HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8028 - "GET /api/projects/2/outline HTTP/1.1" 200 OK
+INFO:     192.168.30.220:19518 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+2025-08-03 02:14:42.249 | INFO     | app.services.parser:queue_parse_file:215 - Publishing task to stream file_parser_stream: {'file_id': 6, 'user_id': 'user_1754041100970_1yhl7j5h5', 'parse_method': 'auto'}
+INFO:     192.168.30.220:44084 - "POST /api/upload HTTP/1.1" 200 OK
+INFO:     192.168.30.220:44090 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42940 - "GET /api/projects/2 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42954 - "GET /api/projects/2/analysis HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42974 - "GET /api/projects/2/documents HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42962 - "GET /api/projects/2/outline HTTP/1.1" 200 OK
+INFO:     192.168.30.220:42978 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:16572 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:16578 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+2025-08-03 02:15:01.777 | INFO     | app.services.parser:parse_file:102 - User settings: {'user_id': 'user_1754041100970_1yhl7j5h5', 'ocr_lang': 'ch', 'force_ocr': False, 'table_recognition': True, 'formula_recognition': True, 'backend': 'pipeline'}
+2025-08-03 02:15:01.797 | INFO     | app.services.parser:parse_file:125 - Starting document parsing for file: f757f9cf-9504-43a0-a411-840b44a35813.pdf
+2025-08-03 02:15:01.797 | INFO     | app.services.parser:parse_file:126 - Using backend: pipeline, method: auto
+2025-08-03 02:15:01.798 | INFO     | app.services.mineru_client:upload_document:118 - Uploading document to MinerU: http://192.168.30.54:8088/file_parse
+2025-08-03 02:15:01.798 | INFO     | app.services.mineru_client:upload_document:119 - Parameters: method=auto, lang=ch, backend=pipeline
+INFO:     192.168.30.220:16600 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:4782 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:4786 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:4794 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:4808 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5776 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5780 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:5786 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22198 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22206 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:22210 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35444 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35446 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35462 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:35464 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:65086 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:65096 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:65108 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:50686 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:50694 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:50708 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61182 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61192 - "GET /api/files?page=1&page_size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61224 - "GET /api/files/6/download_url HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61208 - "GET /api/files/6/parsed_content HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61238 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61242 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:51784 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:51794 - "DELETE /api/files/5 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:51804 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:51816 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:51830 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:51844 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:1898 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:1912 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:1916 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:33932 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:33936 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:33946 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:29916 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:29932 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:29934 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:29944 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:26276 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:26282 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:26284 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61298 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:61308 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+2025-08-03 02:17:14.029 | INFO     | app.services.mineru_client:upload_document:129 - Document parsing successful
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/parser.py", line 128, in parse_file
+    parse_result = self.mineru_client.parse_document_sync(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 345, in parse_document_sync
+    return loop.run_until_complete(_parse())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 332, in _parse
+    return await self.parse_document_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 265, in parse_document_async
+    raise MinerUException("No task_id returned from upload")
+app.services.mineru_client.MinerUException: No task_id returned from upload
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/parsed.py", line 63, in parse_file
+    result = parser.parse_file(file, user_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/parser.py", line 177, in parse_file
+    self.db.commit()
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1969, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1256, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 1231, in _prepare_impl
+    self.session.flush()
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4312, in flush
+    self._flush(objects)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4447, in _flush
+    with util.safe_reraise():
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4408, in _flush
+    flush_context.execute()
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 85, in save_obj
+    _emit_update_statements(
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 775, in _emit_update_statements
+    for (
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 574, in _collect_update_commands
+    history = state.manager[propkey].impl.get_history(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 1255, in get_history
+    current = self.get(state, dict_, passive=passive)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 1086, in get
+    value = self._fire_loader_callables(state, key, passive)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py", line 1116, in _fire_loader_callables
+    return state._load_expired(state, passive)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/state.py", line 798, in _load_expired
+    self.manager.expired_attribute_loader(self, toload, passive)
+  File "/data/_caiqiang/github/mineru-web/backend/.venv/lib/python3.11/site-packages/sqlalchemy/orm/loading.py", line 1661, in load_scalar_attributes
+    raise orm_exc.ObjectDeletedError(state)
+sqlalchemy.orm.exc.ObjectDeletedError: Instance '<File at 0x7f61d91dcdd0>' has been deleted, or its row is otherwise not present.
+INFO:     192.168.30.220:33866 - "POST /api/files/5/parse HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.30.220:61322 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:48870 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:48876 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:48890 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:48894 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:6674 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:11624 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+2025-08-03 02:18:04.887 | INFO     | app.services.mineru_client:upload_document:129 - Document parsing successful
+2025-08-03 02:18:04.895 | ERROR    | app.services.parser:parse_file:178 - Document parsing failed: No task_id returned from upload
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/parser.py", line 128, in parse_file
+    parse_result = self.mineru_client.parse_document_sync(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 345, in parse_document_sync
+    return loop.run_until_complete(_parse())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "uvloop/loop.pyx", line 1518, in uvloop.loop.Loop.run_until_complete
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 332, in _parse
+    return await self.parse_document_async(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/mineru_client.py", line 265, in parse_document_async
+    raise MinerUException("No task_id returned from upload")
+app.services.mineru_client.MinerUException: No task_id returned from upload
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/_caiqiang/github/mineru-web/backend/app/api/parsed.py", line 63, in parse_file
+    result = parser.parse_file(file, user_id)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/_caiqiang/github/mineru-web/backend/app/services/parser.py", line 179, in parse_file
+    raise Exception(f"解析失败: {str(e)}")
+Exception: 解析失败: No task_id returned from upload
+INFO:     192.168.30.220:16592 - "POST /api/files/6/parse HTTP/1.1" 500 Internal Server Error
+INFO:     192.168.30.220:55474 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55486 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55492 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55496 - "GET /api/files?page=1&page_size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55504 - "GET /api/files/6/parsed_content HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55516 - "GET /api/files/6/download_url HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53640 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53642 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:53650 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55684 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55686 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55688 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55378 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55382 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:55390 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:56798 - "GET /api/files?page=1&page_size=10&search= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:56824 - "GET /api/files/6/download_url HTTP/1.1" 200 OK
+INFO:     192.168.30.220:56814 - "GET /api/files/6/parsed_content HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8030 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8034 - "GET /api/projects?page=1&page_size=10 HTTP/1.1" 200 OK
+INFO:     192.168.30.220:8036 - "GET /api/files?page=1&page_size=10&search=&status= HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55362 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55362 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55362 - "GET /docs HTTP/1.1" 200 OK
+INFO:     192.168.5.158:55362 - "GET /openapi.json HTTP/1.1" 200 OK

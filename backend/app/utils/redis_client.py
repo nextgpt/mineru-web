@@ -7,7 +7,7 @@ from typing import Dict, Any, List, Tuple
 class RedisClient:
     def __init__(self):
         REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-        REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+        REDIS_PORT = int(os.getenv("REDIS_PORT", 16379))
         REDIS_DB = int(os.getenv("REDIS_DB", 0))
         REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
 

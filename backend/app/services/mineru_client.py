@@ -102,18 +102,19 @@ class MinerUClient:
             
             # 准备表单数据
             data = aiohttp.FormData()
-            data.add_field('file', file_bytes, filename=file_name)
+            data.add_field('files', file_bytes, filename=file_name)
             data.add_field('parse_method', parse_method)
-            data.add_field('lang', lang)
+            data.add_field('lang_list', lang)
             data.add_field('formula_enable', str(formula_enable).lower())
             data.add_field('table_enable', str(table_enable).lower())
             data.add_field('backend', backend)
             data.add_field('start_page_id', str(start_page_id))
+            data.add_field('return_md', 'true')
             if end_page_id is not None:
                 data.add_field('end_page_id', str(end_page_id))
             
             # 发送请求
-            url = f"{self.api_url}/api/v1/documents/parse"
+            url = f"{self.api_url}/file_parse"
             logger.info(f"Uploading document to MinerU: {url}")
             logger.info(f"Parameters: method={parse_method}, lang={lang}, backend={backend}")
             
@@ -125,8 +126,12 @@ class MinerUClient:
                     )
                 
                 result = await response.json()
-                logger.info(f"Document upload successful: {result}")
-                return result
+                logger.info(f"Document parsing successful")
+                # MinerU直接返回解析结果，不需要轮询
+                return {
+                    'status': 'completed',
+                    'result': result
+                }
                 
         except aiohttp.ClientError as e:
             logger.error(f"Network error during document upload: {e}")
