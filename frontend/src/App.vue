@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HomeFilled, Upload, Document, Setting, FolderOpened } from '@element-plus/icons-vue'
+import { HomeFilled, Document, Setting } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
@@ -7,9 +7,7 @@ const route = useRoute()
 
 const menuItems = [
   { icon: HomeFilled, path: '/', tooltip: '首页', label: '首页' },
-  { icon: Document, path: '/projects', tooltip: '创建投标方案', label: '项目' },
-  { icon: FolderOpened, path: '/files', tooltip: '文件管理', label: '文件' },
-  { icon: Upload, path: '/upload', tooltip: '上传', label: '上传' }
+  { icon: Document, path: '/projects', tooltip: '创建投标方案', label: '项目' }
 ]
 
 const activeMenu = () => {
