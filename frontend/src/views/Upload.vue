@@ -1,75 +1,86 @@
 <template>
-  <div class="upload-root">
-    <div class="upload-card">
-      <div class="upload-header">
-        <span class="upload-title">点击或拖拽上传文档</span>
-        <el-button class="url-btn" type="default" size="small" plain @click="showUrlDialog = true">
-          <el-icon><link /></el-icon> URL 上传
-        </el-button>
+  <div class="upload-page">
+    <!-- 页面标题区域 - 与系统logo平行对齐 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">文档上传</h1>
+        <p class="page-subtitle">上传您的文档进行智能解析</p>
       </div>
-      <el-upload
-        ref="uploadRef"
-        class="upload-area"
-        drag
-        action="/api/upload"
-        :auto-upload="false"
-        :on-change="handleFileChange"
-        :on-remove="handleFileRemove"
-        :before-upload="beforeUpload"
-        accept=".pdf,.png,.jpg,.jpeg"
-        multiple
-        :limit="20"
-        :disabled="uploading"
-      >
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-        <div class="el-upload__text">
-          拖拽文件到此处，或 <span class="upload-link">点击上传</span>
-        </div>
-        <template #tip>
-          <div class="el-upload__tip">
-            支持的文件类型：PDF、PNG、JPG、JPEG
-            <br>
-            单个文档不超过 <b>200M</b> 或 <b>600</b> 页，单图片不超过 <b>10M</b>，单次最多 <b>20</b> 个文件
-          </div>
-        </template>
-      </el-upload>
-      <div class="upload-list" v-if="fileList.length > 0">
-        <div class="upload-list-header">
-          <span>待上传文件列表</span>
-          <el-button type="primary" @click="handleUpload" :loading="uploading" :disabled="uploading || fileList.length === 0" size="small">
-            <el-icon v-if="!uploading"><upload-filled /></el-icon>
-            <span v-if="!uploading">开始上传</span>
-            <span v-else>上传中...</span>
+    </div>
+
+    <div class="upload-content">
+      <div class="upload-card">
+        <div class="upload-header">
+          <span class="upload-title">点击或拖拽上传文档</span>
+          <el-button class="url-btn" type="default" size="small" plain @click="showUrlDialog = true">
+            <el-icon><link /></el-icon> URL 上传
           </el-button>
         </div>
-        <el-table :data="fileList" border stripe>
-          <el-table-column prop="name" label="文件名" />
-          <el-table-column prop="size" label="大小" width="120">
-            <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
-          </el-table-column>
-          <el-table-column label="状态" width="120">
-            <template #default="{ row }">
-              <el-tag :type="getStatusType(row.status)">
-                {{ getStatusText(row.status) }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="120">
-            <template #default="{ row }">
-              <el-button 
-                type="danger" 
-                link 
-                @click="handleFileRemove(row)"
-                :disabled="row.status === 'uploading' || uploading"
-              >
-                删除
-              </el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-upload
+          ref="uploadRef"
+          class="upload-area"
+          drag
+          action="/api/upload"
+          :auto-upload="false"
+          :on-change="handleFileChange"
+          :on-remove="handleFileRemove"
+          :before-upload="beforeUpload"
+          accept=".pdf,.png,.jpg,.jpeg"
+          multiple
+          :limit="20"
+          :disabled="uploading"
+        >
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            拖拽文件到此处，或 <span class="upload-link">点击上传</span>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">
+              支持的文件类型：PDF、PNG、JPG、JPEG
+              <br>
+              单个文档不超过 <b>200M</b> 或 <b>600</b> 页，单图片不超过 <b>10M</b>，单次最多 <b>20</b> 个文件
+            </div>
+          </template>
+        </el-upload>
+        <div class="upload-list" v-if="fileList.length > 0">
+          <div class="upload-list-header">
+            <span>待上传文件列表</span>
+            <el-button type="primary" @click="handleUpload" :loading="uploading" :disabled="uploading || fileList.length === 0" size="small">
+              <el-icon v-if="!uploading"><upload-filled /></el-icon>
+              <span v-if="!uploading">开始上传</span>
+              <span v-else>上传中...</span>
+            </el-button>
+          </div>
+          <el-table :data="fileList" border stripe>
+            <el-table-column prop="name" label="文件名" />
+            <el-table-column prop="size" label="大小" width="120">
+              <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
+            </el-table-column>
+            <el-table-column label="状态" width="120">
+              <template #default="{ row }">
+                <el-tag :type="getStatusType(row.status)">
+                  {{ getStatusText(row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="120">
+              <template #default="{ row }">
+                <el-button 
+                  type="danger" 
+                  link 
+                  @click="handleFileRemove(row)"
+                  :disabled="row.status === 'uploading' || uploading"
+                >
+                  删除
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <el-empty v-else description="暂无待上传文件，快来体验智能解析吧！" :image-size="100" class="upload-empty" />
       </div>
-      <el-empty v-else description="暂无待上传文件，快来体验智能解析吧！" :image-size="100" class="upload-empty" />
     </div>
+
     <el-dialog v-model="showUrlDialog" title="URL 上传" width="400px" :close-on-click-modal="false">
       <el-form @submit.prevent>
         <el-form-item label="文档URL" :error="urlError">
@@ -258,16 +269,52 @@ const handleUpload = async () => {
 
 <style scoped>
 
-.upload-root {
-  width: 100%;
+.upload-page {
+  padding: 0 27px; /* 与导航栏间距保持一致 */
+  background: #f7f8fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 20px;
+  height: 64px; /* 与系统logo区域高度一致 */
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.upload-content {
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 32px 0 0 0;
   box-sizing: border-box;
-  /* min-height: 70vh; */
-  /* height: auto; */
 }
+
 .upload-card {
   width: 100%;
   max-width: 80vw;

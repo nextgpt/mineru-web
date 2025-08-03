@@ -1,14 +1,14 @@
 <template>
   <div class="home-page">
-    <!-- 顶部导航 -->
-    <div class="top-nav">
-      <div class="nav-left">
-        <div class="logo">
+    <!-- 页面标题区域 - 与系统logo平行对齐 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">
           <el-icon size="24" color="#6366f1"><Document /></el-icon>
-          <span class="logo-text">创建投标方案</span>
-        </div>
+          创建投标方案
+        </h1>
       </div>
-      <div class="nav-right">
+      <div class="header-right">
         <el-button type="text" @click="goToProjects">
           <el-icon><List /></el-icon>
           项目列表
@@ -22,71 +22,68 @@
 
     <!-- 主要内容区域 -->
     <div class="main-content">
-      <!-- 中心内容 -->
-      <div class="center-content">
-        <div class="title-section">
-          <h1 class="main-title">
-            通过招标文件<span class="highlight">智能生成标书</span>
-          </h1>
-          <p class="subtitle">
-            上传您的招标文件，AI将为您分析需求并生成专业的投标方案，生成高质量文档，完成全流程投标
-          </p>
-        </div>
+      <div class="title-section">
+        <h1 class="main-title">
+          通过招标文件<span class="highlight">智能生成标书</span>
+        </h1>
+        <p class="subtitle">
+          上传您的招标文件，AI将为您分析需求并生成专业的投标方案，生成高质量文档，完成全流程投标
+        </p>
+      </div>
 
-        <!-- 上传区域 -->
-        <div class="upload-section">
-          <div class="upload-container">
-            <el-upload
-              ref="uploadRef"
-              :auto-upload="false"
-              :limit="1"
-              :on-change="handleFileChange"
-              :on-remove="handleFileRemove"
-              :before-upload="beforeUpload"
-              drag
-              accept=".pdf,.doc,.docx,.xlsx,.xls"
-              class="upload-dragger"
-            >
-              <div class="upload-content">
-                <!-- 文件类型图标 -->
-                <div class="file-icons">
-                  <div class="file-icon pdf-icon">
-                    <el-icon size="24"><Document /></el-icon>
-                  </div>
-                  <div class="file-icon doc-icon">
-                    <el-icon size="24"><Document /></el-icon>
-                  </div>
-                  <div class="file-icon excel-icon">
-                    <el-icon size="24"><Document /></el-icon>
-                  </div>
+      <!-- 上传区域 -->
+      <div class="upload-section">
+        <div class="upload-container">
+          <el-upload
+            ref="uploadRef"
+            :auto-upload="false"
+            :limit="1"
+            :on-change="handleFileChange"
+            :on-remove="handleFileRemove"
+            :before-upload="beforeUpload"
+            drag
+            accept=".pdf,.doc,.docx,.xlsx,.xls"
+            class="upload-dragger"
+          >
+            <div class="upload-content">
+              <!-- 文件类型图标 -->
+              <div class="file-icons">
+                <div class="file-icon pdf-icon">
+                  <el-icon size="24"><Document /></el-icon>
                 </div>
-                
-                <div class="upload-text">
-                  <p class="upload-main-text">
-                    支持(.doc/.docx/.pdf/.xlsx/.xls)格式文件，<span class="highlight-text">拖拽上传或点击文件</span>
-                  </p>
-                  <p class="upload-sub-text">可拖拽上传或点击文件（文件大小限制）</p>
+                <div class="file-icon doc-icon">
+                  <el-icon size="24"><Document /></el-icon>
                 </div>
-                
-                <el-button type="primary" class="upload-button">
-                  选择上传招标文件
-                </el-button>
+                <div class="file-icon excel-icon">
+                  <el-icon size="24"><Document /></el-icon>
+                </div>
               </div>
-            </el-upload>
-          </div>
+              
+              <div class="upload-text">
+                <p class="upload-main-text">
+                  支持(.doc/.docx/.pdf/.xlsx/.xls)格式文件，<span class="highlight-text">拖拽上传或点击文件</span>
+                </p>
+                <p class="upload-sub-text">可拖拽上传或点击文件（文件大小限制）</p>
+              </div>
+              
+              <el-button type="primary" class="upload-button">
+                选择上传招标文件
+              </el-button>
+            </div>
+          </el-upload>
         </div>
+      </div>
 
-        <!-- 进度显示 -->
-        <div v-if="uploadProgress > 0" class="progress-section">
-          <div class="progress-container">
-            <el-progress 
-              :percentage="uploadProgress" 
-              :status="uploadStatus"
-              :stroke-width="8"
-              class="upload-progress"
-            />
-            <p class="progress-text">{{ progressText }}</p>
-          </div>
+      <!-- 进度显示 -->
+      <div v-if="uploadProgress > 0" class="progress-section">
+        <div class="progress-container">
+          <el-progress 
+            :percentage="uploadProgress" 
+            :status="uploadStatus"
+            :stroke-width="8"
+            class="upload-progress"
+          />
+          <p class="progress-text">{{ progressText }}</p>
         </div>
       </div>
     </div>
@@ -285,70 +282,68 @@ const handleDialogClose = (done: () => void) => {
 
 <style scoped>
 .home-page {
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
   background: #f7f8fa;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  overflow: hidden;
 }
 
-.top-nav {
+.page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
-  background: #fff;
+  padding: 0 27px;
+  height: 64px;
+  background: transparent;
   border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
-.nav-left .logo {
+.header-left .page-title {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.logo-text {
   font-size: 18px;
   font-weight: 600;
   color: #1f2937;
+  margin: 0;
 }
 
-.nav-right {
+.header-right {
   display: flex;
   gap: 16px;
 }
 
-.nav-right .el-button {
+.header-right .el-button {
   color: #6b7280;
   border: 1px solid #e5e7eb;
   background: #fff;
 }
 
-.nav-right .el-button:hover {
+.header-right .el-button:hover {
   background: #f9fafb;
   color: #374151;
 }
 
 .main-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 80px);
-  padding: 40px 20px;
+  padding: 40px;
   position: relative;
-}
-
-
-
-.center-content {
-  max-width: 800px;
   width: 100%;
-  text-align: center;
-  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .title-section {
   margin-bottom: 60px;
+  text-align: center;
+  width: 100%;
 }
 
 .main-title {
@@ -357,6 +352,7 @@ const handleDialogClose = (done: () => void) => {
   color: #1f2937;
   margin: 0 0 20px 0;
   line-height: 1.2;
+  text-align: center;
 }
 
 .main-title .highlight {
@@ -371,20 +367,26 @@ const handleDialogClose = (done: () => void) => {
   color: #6b7280;
   line-height: 1.6;
   margin: 0;
+  text-align: center;
   max-width: 600px;
   margin: 0 auto;
 }
 
 .upload-section {
   margin-bottom: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .upload-container {
-  background: #fff;
+  background: transparent;
   border-radius: 24px;
   padding: 40px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-  border: 1px solid #e5e7eb;
+  box-shadow: none;
+  border: none;
+  width: 100%;
+  max-width: 600px;
 }
 
 .upload-dragger {
@@ -482,11 +484,11 @@ const handleDialogClose = (done: () => void) => {
 }
 
 .progress-container {
-  background: #fff;
+  background: transparent;
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e5e7eb;
+  box-shadow: none;
+  border: none;
 }
 
 .upload-progress {
@@ -518,8 +520,13 @@ const handleDialogClose = (done: () => void) => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .top-nav {
-    padding: 16px 20px;
+  .page-header {
+    padding: 0 20px;
+    height: 56px; /* 移动端稍微降低高度 */
+  }
+  
+  .page-title {
+    font-size: 16px;
   }
   
   .main-title {
@@ -555,6 +562,14 @@ const handleDialogClose = (done: () => void) => {
 }
 
 @media (max-width: 480px) {
+  .page-header {
+    height: 48px;
+  }
+  
+  .page-title {
+    font-size: 14px;
+  }
+  
   .main-title {
     font-size: 28px;
   }

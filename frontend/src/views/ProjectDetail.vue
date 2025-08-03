@@ -346,6 +346,7 @@ onMounted(() => {
 
 <style scoped>
 .project-detail-page {
+  padding: 0 27px; /* 与导航栏间距保持一致 */
   background: #f7f8fa;
   min-height: 100vh;
 }
@@ -353,30 +354,31 @@ onMounted(() => {
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 24px;
-  background: #fff;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 20px;
+  height: 64px; /* 与系统logo区域高度一致 */
   border-bottom: 1px solid #e5e7eb;
 }
 
 .header-left {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 16px;
 }
 
 .back-button {
-  align-self: flex-start;
+  align-self: center;
 }
 
 .project-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .project-title {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 600;
   color: #1f2937;
   margin: 0;
@@ -385,7 +387,7 @@ onMounted(() => {
 .project-meta {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .create-time {

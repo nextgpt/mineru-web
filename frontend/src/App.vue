@@ -45,16 +45,11 @@ const isSettingsPage = () => route.path === '/settings'
 
     <!-- 主内容区 -->
     <div class="main-area">
-      <template v-if="route.name === 'FilePreview'">
-        <router-view />
-      </template>
-      <template v-else>
-        <main class="content-area">
-          <div :class="['content-card', { 'content-full': route.path !== '/' }]">
-            <router-view />
-          </div>
-        </main>
-      </template>
+      <main class="content-area">
+        <div class="content-full">
+          <router-view />
+        </div>
+      </main>
     </div>
   </div>
 </template>
@@ -151,9 +146,9 @@ const isSettingsPage = () => route.path === '/settings'
   flex: 1;
   background: #f7f8fa;
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  padding: 24px 0;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -170,6 +165,8 @@ const isSettingsPage = () => route.path === '/settings'
 }
 /* 非首页全屏内容区样式 */
 .content-full {
+  width: 100%;
+  height: 100%;
   max-width: none;
   min-height: 0;
   background: transparent;

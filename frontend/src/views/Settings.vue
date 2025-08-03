@@ -1,8 +1,11 @@
 <template>
   <div class="settings-page">
-    <div class="settings-header">
-      <h1 class="page-title">系统设置</h1>
-      <p class="page-subtitle">配置您的应用偏好设置</p>
+    <!-- 页面标题区域 - 与系统logo平行对齐 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">系统设置</h1>
+        <p class="page-subtitle">配置您的应用偏好设置</p>
+      </div>
     </div>
 
     <div class="settings-content">
@@ -162,25 +165,36 @@ onMounted(() => {
 
 <style scoped>
 .settings-page {
-  padding: 32px;
-  max-width: 800px;
-  margin: 0 auto;
+  padding: 0 27px; /* 与导航栏间距保持一致 */
+  background: #f7f8fa;
+  min-height: 100vh;
 }
 
-.settings-header {
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 40px;
-  text-align: center;
+  padding: 0;
+  height: 64px; /* 与系统logo区域高度一致 */
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .page-title {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: #1f2937;
-  margin: 0 0 12px 0;
+  margin: 0;
 }
 
 .page-subtitle {
-  font-size: 16px;
+  font-size: 14px;
   color: #6b7280;
   margin: 0;
 }

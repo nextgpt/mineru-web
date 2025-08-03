@@ -1,90 +1,21 @@
 <template>
-  <div class="files-root">
-    <div class="files-card">
-      <div class="files-header">
-        <span class="files-title">文件列表</span>
-        <div class="files-header-actions">
-          <el-dropdown @command="handleBatchExport" :disabled="!multipleSelection.length">
-            <el-button type="info" size="large" class="batch-export-btn" :loading="batchExporting" plain>
-              <el-icon><i class="el-icon-download" /></el-icon> 批量导出 <el-icon><i class="el-icon-arrow-down" /></el-icon>
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item v-for="(name, format) in ExportFormatNames" 
-                                :key="format" 
-                                :command="format">
-                  {{ name }}
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-          <el-button type="primary" size="large" class="upload-btn" @click="$router.push('/upload')">
-            <el-icon><Upload /></el-icon> 上传文件
-          </el-button>
-        </div>
+  <div class="files-page">
+    <!-- 页面标题区域 - 与系统logo平行对齐 -->
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">文件列表</h1>
+        <p class="page-subtitle">管理您的文档文件</p>
       </div>
-      <div class="files-toolbar">
-        <el-input
-          v-model="params.search"
-          placeholder="请输入文件名称"
-          class="search-input"
-          clearable
-          prefix-icon="Search"
-          @input="onParamChange"
-        />
-        <el-select v-model="params.status" placeholder="筛选状态" class="status-select" clearable @change="onParamChange">
-          <el-option label="全部" value="" />
-          <el-option label="等待解析" value="pending" />
-          <el-option label="解析中" value="parsing" />
-          <el-option label="已完成" value="parsed" />
-          <el-option label="解析失败" value="parse_failed" />
-        </el-select>
-      </div>
-      <el-table :data="files" border stripe v-if="files && files.length > 0 && !loading" @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="48" />
-        <el-table-column prop="filename" label="文件名称">
-          <template #default="{ row }">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <el-tag
-                v-if="row.backend"
-                size="small"
-                :color="getBackendColor(row.backend)"
-                style="color: white; border: none; padding: 0 6px; height: 20px; line-height: 20px;"
-              >
-                {{ getBackendIcon(row.backend) }}
-              </el-tag>
-              <span>{{ row.filename }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="size" label="大小" width="120">
-          <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
-        </el-table-column>
-        <el-table-column prop="uploadTime" label="创建时间" width="180">
-          <template #default="{ row }">{{ formatDateTime(row.upload_time) }}</template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" width="120">
-          <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)">
-              {{ getStatusText(row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="260">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="openPreview(row)">查看</el-button>
-            <el-button type="success" link @click="downloadFile(row)">下载</el-button>
-            <el-button type="danger" link @click="deleteFile(row)">删除</el-button>
-            <el-button 
-              type="warning" 
-              link 
-              @click="parseFile(row)"
-              :disabled="row.status === 'parsed' || row.status === 'parsing'"
-              :title="row.status === 'parsed' ? '文件已解析完成' : (row.status === 'parsing' ? '文件正在解析中' : '开始解析')"
-            >解析</el-button>
-            <el-dropdown @command="(fmt: string) => handleExport(row, fmt as ExportFormat)">
-              <el-button type="info" link :loading="exportingId === row.id">
-                导出 <el-icon><i class="el-icon-arrow-down" /></el-icon>
+    </div>
+
+    <div class="files-content">
+      <div class="files-card">
+        <div class="files-header">
+          <span class="files-title">文件列表</span>
+          <div class="files-header-actions">
+            <el-dropdown @command="handleBatchExport" :disabled="!multipleSelection.length">
+              <el-button type="info" size="large" class="batch-export-btn" :loading="batchExporting" plain>
+                <el-icon><i class="el-icon-download" /></el-icon> 批量导出 <el-icon><i class="el-icon-arrow-down" /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -96,21 +27,108 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-          </template>
-        </el-table-column>
-      </el-table>
-      <el-empty v-else-if="!loading" description="暂无数据" :image-size="80" class="files-empty" />
-      <el-skeleton v-else :rows="6" animated style="margin:32px 0" />
-      <div class="pagination-container">
-        <el-pagination
-          v-model:current-page="params.page"
-          v-model:page-size="params.pageSize"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next"
-          @size-change="onParamChange"
-          @current-change="onParamChange"
-        />
+            <el-button type="primary" size="large" class="upload-btn" @click="$router.push('/projects')">
+              <el-icon><Upload /></el-icon> 上传文件
+            </el-button>
+          </div>
+        </div>
+        <div class="files-toolbar">
+          <el-input
+            v-model="params.search"
+            placeholder="请输入文件名称"
+            class="search-input"
+            clearable
+            prefix-icon="Search"
+            @input="onParamChange"
+          />
+          <el-select v-model="params.status" placeholder="筛选状态" class="status-select" clearable @change="onParamChange">
+            <el-option label="全部" value="" />
+            <el-option label="等待解析" value="pending" />
+            <el-option label="解析中" value="parsing" />
+            <el-option label="已完成" value="parsed" />
+            <el-option label="解析失败" value="parse_failed" />
+          </el-select>
+        </div>
+        <el-table :data="files" border stripe v-if="files && files.length > 0 && !loading" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="48" />
+          <el-table-column prop="filename" label="文件名称">
+            <template #default="{ row }">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <el-tag
+                  v-if="row.backend"
+                  size="small"
+                  :color="getBackendColor(row.backend)"
+                  style="color: white; border: none; padding: 0 6px; height: 20px; line-height: 20px;"
+                >
+                  {{ getBackendIcon(row.backend) }}
+                </el-tag>
+                <span>{{ row.filename }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="size" label="大小" width="120">
+            <template #default="{ row }">{{ formatFileSize(row.size) }}</template>
+          </el-table-column>
+          <el-table-column prop="uploadTime" label="创建时间" width="180">
+            <template #default="{ row }">{{ formatDateTime(row.upload_time) }}</template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="120">
+            <template #default="{ row }">
+              <el-tag :type="getStatusType(row.status)">
+                {{ getStatusText(row.status) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="260">
+            <template #default="{ row }">
+              <el-button type="primary" link @click="openPreview(row)">查看</el-button>
+              <el-button type="success" link @click="downloadFile(row)">下载</el-button>
+              <el-button type="danger" link @click="deleteFile(row)">删除</el-button>
+              <el-button 
+                type="warning" 
+                link 
+                @click="parseFile(row)"
+                :disabled="row.status === 'parsed' || row.status === 'parsing'"
+                :title="row.status === 'parsed' ? '文件已解析完成' : (row.status === 'parsing' ? '文件正在解析中' : '开始解析')"
+              >解析</el-button>
+              <el-dropdown @command="(fmt: string) => handleExport(row, fmt as ExportFormat)">
+                <el-button type="info" link :loading="exportingId === row.id">
+                  导出 <el-icon><i class="el-icon-arrow-down" /></el-icon>
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item v-for="(name, format) in ExportFormatNames" 
+                                    :key="format" 
+                                    :command="format">
+                      {{ name }}
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- 空状态 -->
+        <el-empty v-if="files && files.length === 0 && !loading" description="暂无文件，快来上传您的第一个文档吧！" :image-size="100" class="files-empty" />
+
+        <!-- 加载状态 -->
+        <div v-if="loading" class="loading-container">
+          <el-skeleton :rows="10" animated />
+        </div>
+
+        <!-- 分页 -->
+        <div v-if="files && files.length > 0" class="pagination-container">
+          <el-pagination
+            v-model:current-page="params.page"
+            v-model:page-size="params.pageSize"
+            :page-sizes="[10, 20, 50, 100]"
+            :total="total"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -516,15 +534,53 @@ watch([() => params.page, () => params.pageSize], () => {
 </script>
 
 <style scoped>
-.files-root {
-  width: 100%;
+.files-page {
+  padding: 0 27px; /* 与导航栏间距保持一致 */
+  background: #f7f8fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 20px;
+  height: 64px; /* 与系统logo区域高度一致 */
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.files-content {
+  flex: 1;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
-  padding: 24px 32px 0 32px;
+  padding: 24px 0 0 0;
   box-sizing: border-box;
   overflow-x: hidden;
 }
+
 .files-card {
   width: 100%;
   max-width: none;
@@ -583,6 +639,13 @@ watch([() => params.page, () => params.pageSize], () => {
 }
 .files-empty {
   margin: 32px 0 0 0;
+}
+.loading-container {
+  margin: 32px 0;
+  padding: 20px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 .pagination-container {
   margin-top: 20px;
