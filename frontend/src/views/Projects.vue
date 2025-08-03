@@ -41,8 +41,10 @@
       </div>
     </div>
 
-    <!-- 卡片模式 -->
-    <div v-if="viewMode === 'card'" class="card-view">
+    <!-- 主内容区域 -->
+    <div class="main-content">
+      <!-- 卡片模式 -->
+      <div v-if="viewMode === 'card'" class="card-view">
       <div class="projects-grid">
         <!-- 新建标书卡片 - 永远第一个 -->
         <div class="project-card create-card" @click="showCreateDialog = true">
@@ -112,11 +114,11 @@
       <!-- 空状态 -->
       <div v-if="projects.length === 0 && !loading" class="empty-state">
         <p>- 数据到底了 -</p>
+        </div>
       </div>
-    </div>
 
-    <!-- 列表模式 -->
-    <div v-else class="list-view">
+      <!-- 列表模式 -->
+      <div v-else class="list-view">
       <el-table
         :data="projects"
         v-loading="loading"
@@ -174,11 +176,11 @@
             </el-button>
           </template>
         </el-table-column>
-      </el-table>
-    </div>
+        </el-table>
+      </div>
 
-    <!-- 分页 -->
-    <div class="pagination-wrapper">
+      <!-- 分页 -->
+      <div class="pagination-wrapper">
       <el-pagination
         v-model:current-page="currentPage"
         v-model:page-size="pageSize"
@@ -187,7 +189,8 @@
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-      />
+        />
+      </div>
     </div>
 
     <!-- 创建项目对话框 -->
@@ -449,35 +452,40 @@ onMounted(() => {
 
 <style scoped>
 .projects-page {
-  padding: 0 27px; /* 与导航栏间距保持一致 */
+  width: 100%;
+  height: 100%;
   background: #f7f8fa;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0;
-  margin-bottom: 20px;
-  height: 64px; /* 与logo区域高度一致 */
+  padding: 0 27px;
+  height: 64px;
+  background: transparent;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
-.header-left {
-  flex: 1;
-}
-
-.page-title {
-  font-size: 20px;
+.header-left .page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 4px 0;
+  margin: 0;
 }
 
 .page-subtitle {
-  font-size: 14px;
+  font-size: 12px;
   color: #6b7280;
   margin: 0;
+  margin-left: 0;
 }
 
 .header-right {
@@ -486,8 +494,29 @@ onMounted(() => {
   gap: 12px;
 }
 
+.header-right .el-button {
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.header-right .el-button:hover {
+  background: #f9fafb;
+  color: #374151;
+}
+
 .view-toggle {
   margin-left: 12px;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 27px;
+  position: relative;
+  width: 100%;
+  overflow-y: auto;
 }
 
 /* 卡片视图 */
@@ -750,8 +779,8 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .projects-page {
-    padding: 0 16px; /* 移动端减少边距 */
+  .main-content {
+    padding: 20px 16px; /* 移动端减少边距 */
   }
   
   .projects-grid {
@@ -764,7 +793,7 @@ onMounted(() => {
     gap: 12px;
     align-items: stretch;
     height: auto;
-    padding: 16px 0;
+    padding: 16px;
   }
   
   .header-right {
