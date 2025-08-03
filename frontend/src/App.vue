@@ -65,6 +65,14 @@ const isSettingsPage = () => route.path === '/settings'
   background: #f7f8fa;
   box-sizing: border-box;
 }
+
+/* 深色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .mineru-layout {
+    background: #1a1a1a;
+  }
+}
+
 .sidebar {
   width: 5vw;
   background: #fff;
@@ -76,6 +84,14 @@ const isSettingsPage = () => route.path === '/settings'
   box-sizing: border-box;
   height: 100%; /* 撑满父容器高度 */
   overflow-y: auto; /* 如果内容可能超出，允许独立滚动 */
+}
+
+/* 深色主题下的侧边栏 */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background: #2d2d2d;
+    box-shadow: 2px 0 8px 0 rgba(0,0,0,0.2);
+  }
 }
 .logo-area {
   height: 64px;
@@ -103,10 +119,27 @@ const isSettingsPage = () => route.path === '/settings'
   justify-content: center;
   border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  color: #606266;
 }
+
 .nav-item.active, .nav-item:hover {
   background: #f0f4ff;
+  color: #409eff;
+}
+
+/* 深色主题下的导航项 */
+@media (prefers-color-scheme: dark) {
+  .nav-item {
+    color: #ffffff;
+    opacity: 0.8;
+  }
+  
+  .nav-item.active, .nav-item:hover {
+    background: #404040;
+    color: #409eff;
+    opacity: 1;
+  }
 }
 .sidebar-bottom {
   display: flex;
@@ -121,8 +154,22 @@ const isSettingsPage = () => route.path === '/settings'
   cursor: pointer;
   transition: color 0.2s;
 }
+
 .sidebar-icon:hover, .sidebar-icon.active {
   color: #409eff;
+}
+
+/* 深色主题下的侧边栏图标 */
+@media (prefers-color-scheme: dark) {
+  .sidebar-icon {
+    color: #ffffff;
+    opacity: 0.7;
+  }
+  
+  .sidebar-icon:hover, .sidebar-icon.active {
+    color: #409eff;
+    opacity: 1;
+  }
 }
 .main-area {
   flex: 1;
@@ -144,6 +191,14 @@ const isSettingsPage = () => route.path === '/settings'
   padding: 24px 0;
   box-sizing: border-box;
 }
+
+/* 深色主题下的内容区域 */
+@media (prefers-color-scheme: dark) {
+  .content-area {
+    background: #1a1a1a;
+  }
+}
+
 .content-card {
   width: 95vw;
   /* max-width: 1200px; */
@@ -155,6 +210,15 @@ const isSettingsPage = () => route.path === '/settings'
   position: relative;
   transition: all 0.2s;
   box-sizing: border-box;
+}
+
+/* 深色主题下的内容卡片 */
+@media (prefers-color-scheme: dark) {
+  .content-card {
+    background: #2d2d2d;
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.2);
+    color: #e5e5e5;
+  }
 }
 /* 非首页全屏内容区样式 */
 .content-full {

@@ -33,8 +33,8 @@ async def upload_files(
             ext = os.path.splitext(file.filename)[1]
             unique_filename = f"{uuid.uuid4()}{ext}"
             
-            # 保存到 MinIO
-            upload_file(
+            # 保存到 MinIO（如果失败会自动回退到本地存储）
+            minio_path = upload_file(
                 file.file,
                 unique_filename,
                 file.content_type
@@ -56,7 +56,7 @@ async def upload_files(
                 size=file.size,
                 status=FileStatus.PENDING,
                 upload_time=datetime.utcnow(),
-                minio_path=unique_filename,
+                minio_path=minio_path,  # 使用实际返回的路径
                 content_type=file.content_type,
                 backend=backend
             )
@@ -64,9 +64,14 @@ async def upload_files(
             db.commit()
             db.refresh(db_file)
             
-            # 将解析任务加入队列
-            parser_service = ParserService(db)
-            parser_service.queue_parse_file(db_file, user_id)
+            # 将解析任务加入队列（如果Redis可用）
+            try:
+                parser_service = ParserService(db)
+                parser_service.queue_parse_file(db_file, user_id)
+                print(f"✅ 解析任务已加入队列: {db_file.filename}")
+            except Exception as e:
+                print(f"⚠️ 无法加入解析队列，但文件上传成功: {str(e)}")
+                # 不抛出异常，让文件上传继续完成
             
             results.append(db_file.to_dict())
             
