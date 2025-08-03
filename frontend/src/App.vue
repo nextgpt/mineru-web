@@ -6,10 +6,10 @@ const router = useRouter()
 const route = useRoute()
 
 const menuItems = [
-  { icon: HomeFilled, path: '/', tooltip: '首页' },
-  { icon: Document, path: '/projects', tooltip: '创建投标方案' },
-  { icon: FolderOpened, path: '/files', tooltip: '文件管理' },
-  { icon: Upload, path: '/upload', tooltip: '上传' }
+  { icon: HomeFilled, path: '/', tooltip: '首页', label: '首页' },
+  { icon: Document, path: '/projects', tooltip: '创建投标方案', label: '项目' },
+  { icon: FolderOpened, path: '/files', tooltip: '文件管理', label: '文件' },
+  { icon: Upload, path: '/upload', tooltip: '上传', label: '上传' }
 ]
 
 const activeMenu = () => {
@@ -33,11 +33,15 @@ const isSettingsPage = () => route.path === '/settings'
       </div>
       <nav class="nav-menu">
         <div v-for="item in menuItems" :key="item.path" class="nav-item" :class="{active: activeMenu() === item.path}" @click="router.push(item.path)" :title="item.tooltip">
-          <el-icon :size="24"><component :is="item.icon" /></el-icon>
+          <el-icon :size="20"><component :is="item.icon" /></el-icon>
+          <span class="nav-label">{{ item.label }}</span>
         </div>
       </nav>
       <div class="sidebar-bottom">
-        <el-icon class="sidebar-icon" :class="{active: isSettingsPage()}" @click="router.push('/settings')" title="设置"><Setting /></el-icon>
+        <div class="nav-item" :class="{active: isSettingsPage()}" @click="router.push('/settings')" title="设置">
+          <el-icon :size="20"><Setting /></el-icon>
+          <span class="nav-label">设置</span>
+        </div>
       </div>
     </aside>
 
@@ -66,15 +70,10 @@ const isSettingsPage = () => route.path === '/settings'
   box-sizing: border-box;
 }
 
-/* 深色主题适配 */
-@media (prefers-color-scheme: dark) {
-  .mineru-layout {
-    background: #1a1a1a;
-  }
-}
+
 
 .sidebar {
-  width: 5vw;
+  width: 80px;
   background: #fff;
   display: flex;
   flex-direction: column;
@@ -84,14 +83,6 @@ const isSettingsPage = () => route.path === '/settings'
   box-sizing: border-box;
   height: 100%; /* 撑满父容器高度 */
   overflow-y: auto; /* 如果内容可能超出，允许独立滚动 */
-}
-
-/* 深色主题下的侧边栏 */
-@media (prefers-color-scheme: dark) {
-  .sidebar {
-    background: #2d2d2d;
-    box-shadow: 2px 0 8px 0 rgba(0,0,0,0.2);
-  }
 }
 .logo-area {
   height: 64px;
@@ -112,34 +103,35 @@ const isSettingsPage = () => route.path === '/settings'
   margin-top: 24px;
 }
 .nav-item {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
-  color: #606266;
+  color: #8c8c8c;
+  gap: 4px;
 }
 
-.nav-item.active, .nav-item:hover {
-  background: #f0f4ff;
-  color: #409eff;
+.nav-item.active {
+  background: #e6f4ff;
+  color: #1890ff;
 }
 
-/* 深色主题下的导航项 */
-@media (prefers-color-scheme: dark) {
-  .nav-item {
-    color: #ffffff;
-    opacity: 0.8;
-  }
-  
-  .nav-item.active, .nav-item:hover {
-    background: #404040;
-    color: #409eff;
-    opacity: 1;
-  }
+.nav-item:hover {
+  background: #f5f5f5;
+  color: #1890ff;
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
 }
 .sidebar-bottom {
   display: flex;
@@ -147,29 +139,6 @@ const isSettingsPage = () => route.path === '/settings'
   gap: 16px;
   align-items: center;
   margin-bottom: 24px;
-}
-.sidebar-icon {
-  font-size: 22px;
-  color: #b1b3b8;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.sidebar-icon:hover, .sidebar-icon.active {
-  color: #409eff;
-}
-
-/* 深色主题下的侧边栏图标 */
-@media (prefers-color-scheme: dark) {
-  .sidebar-icon {
-    color: #ffffff;
-    opacity: 0.7;
-  }
-  
-  .sidebar-icon:hover, .sidebar-icon.active {
-    color: #409eff;
-    opacity: 1;
-  }
 }
 .main-area {
   flex: 1;
@@ -182,8 +151,6 @@ const isSettingsPage = () => route.path === '/settings'
 }
 .content-area {
   flex: 1;
-  /* {height: auto;} */
-  width: 95vw;
   background: #f7f8fa;
   display: flex;
   justify-content: center;
@@ -192,16 +159,9 @@ const isSettingsPage = () => route.path === '/settings'
   box-sizing: border-box;
 }
 
-/* 深色主题下的内容区域 */
-@media (prefers-color-scheme: dark) {
-  .content-area {
-    background: #1a1a1a;
-  }
-}
-
 .content-card {
-  width: 95vw;
-  /* max-width: 1200px; */
+  width: calc(100vw - 80px - 48px); /* 减去侧边栏宽度和边距 */
+  max-width: 1200px;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 4px 24px 0 rgba(0,0,0,0.04);
@@ -210,15 +170,6 @@ const isSettingsPage = () => route.path === '/settings'
   position: relative;
   transition: all 0.2s;
   box-sizing: border-box;
-}
-
-/* 深色主题下的内容卡片 */
-@media (prefers-color-scheme: dark) {
-  .content-card {
-    background: #2d2d2d;
-    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.2);
-    color: #e5e5e5;
-  }
 }
 /* 非首页全屏内容区样式 */
 .content-full {

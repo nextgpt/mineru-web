@@ -1,0 +1,195 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: lpdswing/mineru-web-frontend:v2.0.0
+    ports:
+      - "8088:80"
+    depends_on:
+      - backend
+      - minio
+    networks:
+      - mineru-network
+
+  backend:
+    image: lpdswing/mineru-web-backend:v2.1.9
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_SECURE=false
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/bidgen
+      - MINERU_API_URL=http://192.168.30.54:8088
+      - LLM_API_URL=http://192.168.30.54:3000/v1
+      - LLM_API_KEY=token-abc123
+      - LLM_MODEL_NAME=Qwen3-30B-A3B-FP8
+      # 按需配置
+      - BACKEND=sglang-client  # 只能用client，uvicorn无法在子进程加载vlm模型
+      # - MODEL_PATH=/models/vlm
+      - SERVER_URL=http://mineru-sglang:30000
+    volumes:
+      - ./backend:/app
+      - ./mineru.json:/root/mineru.json
+      - ./models2.0:/models
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mineru-sglang:
+        condition: service_healthy
+    networks:
+      - mineru-network
+
+  worker:
+    image: lpdswing/mineru-web-backend:v2.1.9
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: python run_worker.py
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_SECURE=false
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/bidgen
+      - MINERU_API_URL=http://192.168.30.54:8088
+      - LLM_API_URL=http://192.168.30.54:3000/v1
+      - LLM_API_KEY=token-abc123
+      - LLM_MODEL_NAME=Qwen3-30B-A3B-FP8
+      # 按需配置
+      - SERVER_URL=http://mineru-sglang:30000  # sglang server服务地址
+
+    volumes:
+      - ./backend:/app
+      - ./mineru.json:/root/mineru.json
+      - ./models2.0:/models
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      mineru-sglang:
+        condition: service_healthy
+    networks:
+      - mineru-network
+
+  mineru-sglang:
+    image: lpdswing/mineru-web-backend:v2.1.9
+    container_name: mineru-sglang
+    restart: always
+    ports:
+      - "30000:30000"
+    environment:
+      MINERU_MODEL_SOURCE: local
+    entrypoint: mineru-sglang-server
+    volumes:
+      - ./mineru.json:/root/mineru.json
+      - ./models2.0:/models
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - "30000"
+      # --enable-torch-compile  # You can also enable torch.compile to accelerate inference speed by approximately 15%
+      # --dp-size 2  # If using multiple GPUs, increase throughput using sglang's multi-GPU parallel mode
+      # --tp-size 2  # If you have more than one GPU, you can expand available VRAM using tensor parallelism (TP) mode.
+      # --mem-fraction-static 0.5  # If running on a single GPU and encountering VRAM shortage, reduce the KV cache size by this parameter, if VRAM issues persist, try lowering it further to `0.4` or below.
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    ipc: host
+    networks:
+      - mineru-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:30000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]
+
+  redis:
+    image: redis:latest
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mineru-network
+
+  minio:
+    image: quay.io/minio/minio:latest
+    ports:
+      - "19000:9000"
+      - "19001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - mineru-network
+
+  postgres:
+    image: postgres:17
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_DB: bidgen
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - mineru-network
+
+volumes:
+  minio_data:
+  redis_data:
+  postgres_data:
+
+networks:
+  mineru-network:
+    driver: bridge
