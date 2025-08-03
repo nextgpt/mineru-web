@@ -449,7 +449,7 @@ onMounted(() => {
 
 <style scoped>
 .projects-page {
-  padding: 0;
+  padding: 0 27px; /* 与导航栏间距保持一致 */
   background: #f7f8fa;
   min-height: 100vh;
 }
@@ -458,8 +458,9 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 0;
+  padding: 0;
   margin-bottom: 20px;
+  height: 64px; /* 与logo区域高度一致 */
 }
 
 .header-left {
@@ -496,7 +497,7 @@ onMounted(() => {
 
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(5, 1fr); /* 每行固定5个卡片 */
   gap: 20px;
   margin-bottom: 20px;
 }
@@ -508,6 +509,9 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   overflow: hidden;
+  aspect-ratio: 1; /* 保持正方形比例 */
+  display: flex;
+  flex-direction: column;
 }
 
 .project-card:hover {
@@ -519,7 +523,6 @@ onMounted(() => {
 .create-card {
   border: 2px dashed #d1d5db;
   background: #fafafa;
-  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -532,7 +535,8 @@ onMounted(() => {
 
 .create-card-content {
   text-align: center;
-  padding: 20px;
+  padding: 16px;
+  width: 100%;
 }
 
 .create-icon {
@@ -547,9 +551,9 @@ onMounted(() => {
 }
 
 .file-icon {
-  width: 32px;
-  height: 40px;
-  border-radius: 4px;
+  width: 24px;
+  height: 30px;
+  border-radius: 3px;
   position: relative;
 }
 
@@ -566,21 +570,22 @@ onMounted(() => {
 }
 
 .create-text h3 {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
 }
 
 .create-text p {
-  font-size: 12px;
+  font-size: 11px;
   color: #6b7280;
-  margin: 0 0 16px 0;
-  line-height: 1.4;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
 }
 
 .upload-btn {
-  font-size: 14px;
+  font-size: 12px;
+  padding: 6px 12px;
 }
 
 /* 项目卡片 */
@@ -588,19 +593,21 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 16px 0 16px;
+  padding: 12px 12px 0 12px;
+  flex-shrink: 0;
 }
 
 .status-tag {
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .more-icon {
   color: #9ca3af;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 2px;
+  border-radius: 3px;
   transition: all 0.2s;
+  font-size: 14px;
 }
 
 .more-icon:hover {
@@ -609,44 +616,54 @@ onMounted(() => {
 }
 
 .card-content {
-  padding: 12px 16px 16px 16px;
+  padding: 8px 12px 12px 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .project-title {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
-}
-
-.project-description {
-  font-size: 13px;
-  color: #6b7280;
-  margin: 0 0 12px 0;
-  line-height: 1.4;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
+.project-description {
+  font-size: 11px;
+  color: #6b7280;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
 .project-meta {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  margin-top: auto;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .meta-label {
   color: #9ca3af;
   margin-right: 4px;
-  min-width: 60px;
+  min-width: 50px;
 }
 
 .meta-value {
@@ -720,21 +737,39 @@ onMounted(() => {
 }
 
 /* 响应式设计 */
-@media (max-width: 768px) {
+@media (max-width: 1400px) {
   .projects-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr); /* 中等屏幕4列 */
+  }
+}
+
+@media (max-width: 1100px) {
+  .projects-grid {
+    grid-template-columns: repeat(3, 1fr); /* 小屏幕3列 */
+  }
+}
+
+@media (max-width: 768px) {
+  .projects-page {
+    padding: 0 16px; /* 移动端减少边距 */
+  }
+  
+  .projects-grid {
+    grid-template-columns: repeat(2, 1fr); /* 移动端2列 */
+    gap: 12px;
   }
   
   .page-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: stretch;
+    height: auto;
+    padding: 16px 0;
   }
   
   .header-right {
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
   }
   
   .header-right .el-input {
@@ -742,9 +777,9 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 480px) {
   .projects-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: 1fr; /* 超小屏幕1列 */
   }
 }
 </style>
