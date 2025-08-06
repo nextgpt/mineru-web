@@ -1,44 +1,40 @@
 <script setup lang="ts">
-import { HomeFilled, Upload, Document, Setting } from '@element-plus/icons-vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { Document } from '@element-plus/icons-vue'
+import Navigation from './components/Navigation.vue'
 
-const router = useRouter()
 const route = useRoute()
 
-const menuItems = [
-  { icon: HomeFilled, path: '/', tooltip: '首页' },
-  { icon: Document, path: '/files', tooltip: '文件管理' },
-  { icon: Upload, path: '/upload', tooltip: '上传' }
-]
-
-const activeMenu = () => {
-  const path = route.path
-  // 特殊处理首页
-  if (path === '/') return '/'
-  // 其他页面需要完全匹配路径
-  return menuItems.find(item => path === item.path)?.path || path
+// 当前时间
+const currentTime = ref('')
+const updateTime = () => {
+  const now = new Date()
+  currentTime.value = now.toLocaleTimeString('zh-CN', { 
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
-// 检查是否是设置页面
-const isSettingsPage = () => route.path === '/settings'
+// 定时更新时间
+let timeInterval: number
+onMounted(() => {
+  updateTime()
+  timeInterval = window.setInterval(updateTime, 1000)
+})
+
+onUnmounted(() => {
+  if (timeInterval) {
+    clearInterval(timeInterval)
+  }
+})
 </script>
 
 <template>
   <div class="mineru-layout">
-    <!-- 侧边栏 -->
-    <aside class="sidebar">
-      <div class="logo-area">
-        <img src="/logo.png" alt="logo" class="logo" />
-      </div>
-      <nav class="nav-menu">
-        <div v-for="item in menuItems" :key="item.path" class="nav-item" :class="{active: activeMenu() === item.path}" @click="router.push(item.path)" :title="item.tooltip">
-          <el-icon :size="24"><component :is="item.icon" /></el-icon>
-        </div>
-      </nav>
-      <div class="sidebar-bottom">
-        <el-icon class="sidebar-icon" :class="{active: isSettingsPage()}" @click="router.push('/settings')" title="设置"><Setting /></el-icon>
-      </div>
-    </aside>
+    <!-- 导航组件 -->
+    <Navigation />
 
     <!-- 主内容区 -->
     <div class="main-area">
@@ -46,11 +42,28 @@ const isSettingsPage = () => route.path === '/settings'
         <router-view />
       </template>
       <template v-else>
-        <main class="content-area">
-          <div :class="['content-card', { 'content-full': route.path !== '/' }]">
+        <!-- 顶部状态栏 -->
+        <div class="top-status-bar">
+          <div class="system-logo">
+            <el-icon class="logo-icon"><Document /></el-icon>
+            <span class="logo-text">智能标书生成</span>
+          </div>
+          <div class="status-info">
+            <span class="user-info">用户: 管理员</span>
+            <span class="time-info">{{ currentTime }}</span>
+          </div>
+        </div>
+
+        <!-- 主内容面板 -->
+        <div class="main-content-panel">
+          <!-- 网格背景 -->
+          <div class="grid-background"></div>
+          
+          <!-- 内容区域 -->
+          <div class="content-wrapper">
             <router-view />
           </div>
-        </main>
+        </div>
       </template>
     </div>
   </div>
@@ -59,117 +72,114 @@ const isSettingsPage = () => route.path === '/settings'
 <style scoped>
 .mineru-layout {
   display: flex;
-  height: 100vh; /* 固定高度，防止被内容撑开出现滚动条 */
-  overflow: hidden; /* 禁止自身滚动，让子元素独立滚动 */
-  background: #f7f8fa;
+  height: 100vh;
+  overflow: hidden;
+  background: #f5f7fa;
   box-sizing: border-box;
 }
-.sidebar {
-  width: 5vw;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 2px 0 8px 0 rgba(0,0,0,0.03);
-  z-index: 10;
-  box-sizing: border-box;
-  height: 100%; /* 撑满父容器高度 */
-  overflow-y: auto; /* 如果内容可能超出，允许独立滚动 */
-}
-.logo-area {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-.logo {
-  width: 36px;
-  height: 36px;
-}
-.nav-menu {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 24px;
-}
-.nav-item {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.nav-item.active, .nav-item:hover {
-  background: #f0f4ff;
-}
-.sidebar-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-  margin-bottom: 24px;
-}
-.sidebar-icon {
-  font-size: 22px;
-  color: #b1b3b8;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.sidebar-icon:hover, .sidebar-icon.active {
-  color: #409eff;
-}
+
 .main-area {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
   box-sizing: border-box;
-  height: 100vh; /* 撑满父容器高度 */
-  /* overflow-y: auto; 允许主内容区独立垂直滚动 */
+  height: 100vh;
 }
-.content-area {
-  flex: 1;
-  /* {height: auto;} */
-  width: 95vw;
-  background: #f7f8fa;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 24px 0;
-  box-sizing: border-box;
-}
-.content-card {
-  width: 95vw;
-  /* max-width: 1200px; */
+
+/* 顶部状态栏 */
+.top-status-bar {
+  height: 60px;
   background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(0,0,0,0.04);
-  padding: 20px 16px 24px 16px;
-  margin: 0 24px;
+  border-bottom: 1px solid #e4e7ed;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.system-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-icon {
+  font-size: 24px;
+  color: #409eff;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 14px;
+  color: #606266;
+}
+
+.user-info, .time-info {
+  padding: 4px 12px;
+  background: #f0f2f5;
+  border-radius: 16px;
+}
+
+/* 主内容面板 */
+.main-content-panel {
+  flex: 1;
   position: relative;
-  transition: all 0.2s;
-  box-sizing: border-box;
+  overflow: hidden;
 }
-/* 非首页全屏内容区样式 */
-.content-full {
-  max-width: none;
-  min-height: 0;
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
+
+/* 网格背景 */
+.grid-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(rgba(64, 158, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(64, 158, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+/* 内容包装器 */
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  overflow-y: auto;
   padding: 0;
-  margin: 0;
   box-sizing: border-box;
 }
-@media (max-width: 900px) {
-  .content-card {
-    padding: 8px 2px;
-    min-height: 0;
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .top-status-bar {
+    padding: 0 16px;
+  }
+  
+  .system-logo .logo-text {
+    display: none;
+  }
+  
+  .status-info {
+    gap: 12px;
+    font-size: 12px;
+  }
+  
+  .projects-content {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 </style>

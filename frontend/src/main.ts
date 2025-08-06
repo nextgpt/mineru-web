@@ -6,8 +6,16 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { createPinia } from 'pinia'
 import router from './router'
 import App from './App.vue'
+import { validateConfig } from '@/config'
 
 const app = createApp(App)
+
+// 验证配置
+try {
+  validateConfig()
+} catch (error) {
+  console.error('Configuration validation failed:', error)
+}
 
 // 注册所有图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
